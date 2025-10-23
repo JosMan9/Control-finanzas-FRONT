@@ -1,0 +1,15 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar archivos temporales
+dist/
+build/
+.tmp/
+
+# Ignorar configuraciones locales
+.vscode/
+.idea/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Tabla Tarjetas</title>
+    <script type="module" src="./demo.js"></script>
+</head>
+<body id="demo">
+    <h1>Prueba del Componente Tabla Tarjetas</h1>
+    <script type="module">
+        import { html, render } from './demo/demo.js';
+        import { tarjetaMock } from '/src/components/mocks/tarjetaMock.js';
+        const demo = document.getElementById('demo');
+        const tarjetas = tarjetaMock;
+        const tablaTarjetaComponent = () => html`
+            <tabla-tarjeta id="mi-tabla"
+            titulo="Mis Tarjetas de Crédito"
+            .tarjetas="${tarjetas}"
+            ></tabla-tarjeta>
+        `;
+        render(tablaTarjetaComponent(), demo);
+    </script>
+</body>
+</html>
