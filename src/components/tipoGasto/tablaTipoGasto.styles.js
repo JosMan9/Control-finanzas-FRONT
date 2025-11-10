@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-export const tablaTarjetaStyles = css`
+export const tablaTipoGastoStyles = css`
     :host {
   display: block;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -119,3 +119,4 @@ tbody tr:hover {
 
 
 `;
+

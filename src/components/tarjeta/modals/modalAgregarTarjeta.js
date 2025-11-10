@@ -5,6 +5,8 @@ export class ModalAgregarTarjeta extends LitElement {
   static properties = {
     abierto: { type: Boolean },
     titulo: { type: String },
+    modoEdicion: { type: Boolean },
+    tarjetaEditando: { type: Object },
   };
 
   static styles = [modalStyles];
@@ -13,12 +15,15 @@ export class ModalAgregarTarjeta extends LitElement {
     super();
     this.abierto = false;
     this.titulo = "Agregar Nueva Tarjeta";
+    this.modoEdicion = false;
+    this.tarjetaEditando = null;
   }
 
   get #renderHeader() {
+    const titulo = this.modoEdicion ? "Editar Tarjeta" : "Agregar Nueva Tarjeta";
     return html`
       <div class="modal-header">
-        <h2>${this.titulo}</h2>
+        <h2>${titulo}</h2>
         <button class="btn-cerrar" @click="${this.#cerrarModal}">×</button>
       </div>
     `;
@@ -34,7 +39,7 @@ export class ModalAgregarTarjeta extends LitElement {
         >
           Cancelar
         </button>
-        <button type="submit" class="btn btn-primario">Agregar Tarjeta</button>
+        <button type="submit" class="btn btn-primario">${this.modoEdicion ? 'Guardar Cambios' : 'Agregar Tarjeta'}</button>
       </div>
     `;
   }
@@ -50,6 +55,7 @@ export class ModalAgregarTarjeta extends LitElement {
             name="nombre"
             required
             placeholder="Ej: Visa BBVA"
+            .value="${this.tarjetaEditando?.nombre || ''}"
           />
         </div>
 
@@ -59,7 +65,8 @@ export class ModalAgregarTarjeta extends LitElement {
             <option value="">Seleccionar día</option>
             ${Array.from({ length: 31 }, (_, i) => {
               const dia = i + 1;
-              return html`<option value="${dia}">${dia}</option>`;
+              const selected = this.tarjetaEditando?.diaCorte == dia ? 'selected' : '';
+              return html`<option value="${dia}" ${selected}>${dia}</option>`;
             })}
           </select>
         </div>
@@ -70,7 +77,8 @@ export class ModalAgregarTarjeta extends LitElement {
             <option value="">Seleccionar día</option>
             ${Array.from({ length: 31 }, (_, i) => {
               const dia = i + 1;
-              return html`<option value="${dia}">${dia}</option>`;
+              const selected = this.tarjetaEditando?.diaPago == dia ? 'selected' : '';
+              return html`<option value="${dia}" ${selected}>${dia}</option>`;
             })}
           </select>
         </div>
@@ -92,10 +100,6 @@ export class ModalAgregarTarjeta extends LitElement {
     `;
   }
 
-  #cerrarModal() {
-    this.abierto = false;
-    this.dispatchEvent(new CustomEvent("modal-cerrado"));
-  }
 
   #evitarCierre(e) {
     e.stopPropagation();
@@ -105,18 +109,27 @@ export class ModalAgregarTarjeta extends LitElement {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const nuevaTarjeta = {
+    const tarjeta = {
+      id: this.modoEdicion ? this.tarjetaEditando.id : Date.now(),
       nombre: formData.get("nombre"),
-      diaCorte: parseInt(formData.get("diaCorte")),
-      diaPago: parseInt(formData.get("diaPago")),
+      diaCorte: formData.get("diaCorte"),
+      diaPago: formData.get("diaPago"),
     };
 
-    // Emitir evento con los datos
-    this.dispatchEvent(
-      new CustomEvent("tarjeta-agregada", {
-        detail: nuevaTarjeta,
-      })
-    );
+    // Emitir evento según el modo
+    if (this.modoEdicion) {
+      this.dispatchEvent(
+        new CustomEvent("tarjeta-editada", {
+          detail: tarjeta,
+        })
+      );
+    } else {
+      this.dispatchEvent(
+        new CustomEvent("tarjeta-agregada", {
+          detail: tarjeta,
+        })
+      );
+    }
 
     // Limpiar formulario y cerrar modal
     e.target.reset();
@@ -125,12 +138,30 @@ export class ModalAgregarTarjeta extends LitElement {
 
   // Método público para abrir el modal
   abrir() {
+    this.modoEdicion = false;
+    this.tarjetaEditando = null;
     this.abierto = true;
   }
 
   // Método público para cerrar el modal
   cerrar() {
     this.abierto = false;
+    this.modoEdicion = false;
+    this.tarjetaEditando = null;
+  }
+
+  // Método público para abrir el modal en modo edición
+  abrirParaEditar(tarjeta) {
+    this.modoEdicion = true;
+    this.tarjetaEditando = { ...tarjeta };
+    this.abierto = true;
+  }
+
+  #cerrarModal() {
+    this.abierto = false;
+    this.modoEdicion = false;
+    this.tarjetaEditando = null;
+    this.dispatchEvent(new CustomEvent("modal-cerrado"));
   }
 }
 

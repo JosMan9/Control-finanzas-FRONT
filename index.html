@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba Tabla Tarjetas</title>
-    <script type="module" src="./demo.js"></script>
+    <title>Índice de Demos - Componentes Lit</title>
+    <link rel="stylesheet" href="./styles/index.css">
 </head>
-<body id="demo">
-    <h1>Prueba del Componente Tabla Tarjetas</h1>
-    <script type="module">
-        import { html, render } from './demo/demo.js';
-        import { tarjetaMock } from '/src/components/mocks/tarjetaMock.js';
-        const demo = document.getElementById('demo');
-        const tarjetas = tarjetaMock;
-        const tablaTarjetaComponent = () => html`
-            <tabla-tarjeta id="mi-tabla"
-            titulo="Mis Tarjetas de Crédito"
-            .tarjetas="${tarjetas}"
-            ></tabla-tarjeta>
-        `;
-        render(tablaTarjetaComponent(), demo);
-    </script>
+<body>
+    <div class="container">
+        <h1>Componentes Lit</h1>
+        <p class="subtitle">Selecciona un componente para ver su demo</p>
+
+        <div class="demo-grid">
+            <a href="demo-tarjeta.html" class="demo-card">
+                <div class="demo-icon">💳</div>
+                <h2>Tabla Tarjeta</h2>
+                <p>Componente para gestionar tarjetas de crédito con día de corte y día de pago.</p>
+            </a>
+
+            <a href="demo-tipo-gasto.html" class="demo-card">
+                <div class="demo-icon">💰</div>
+                <h2>Tipo de Gasto</h2>
+                <p>Componente para gestionar diferentes tipos de gastos con nombre.</p>
+            </a>
+        </div>
+    </div>
 </body>
 </html>

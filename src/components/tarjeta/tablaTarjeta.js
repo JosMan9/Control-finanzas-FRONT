@@ -8,7 +8,6 @@ export class TablaTarjeta extends LitElement {
     titulo: { type: String },
     tarjetas: { type: Array },
     cargando: { type: Boolean },
-    locale: { type: String }
   };
 
   static styles = [tablaTarjetaStyles];
@@ -18,8 +17,8 @@ export class TablaTarjeta extends LitElement {
     this.titulo = 'Tarjetas';
     this.tarjetas = [];
     this.cargando = false;
-    this.locale = 'es-MX';
   }
+
   get #renderSkeleton() {
     return html`
       <table>
@@ -28,6 +27,7 @@ export class TablaTarjeta extends LitElement {
             <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:140px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:140px;"></span></th>
+            <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
           </tr>
         </thead>
         <tbody>
@@ -36,6 +36,7 @@ export class TablaTarjeta extends LitElement {
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
+              <td><div class="skeleton" style="width:60px;"></div></td>
             </tr>
           `)}
         </tbody>
@@ -54,6 +55,7 @@ export class TablaTarjeta extends LitElement {
             <th>Nombre</th>
             <th>Día de corte</th>
             <th>Día de pago</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -62,6 +64,14 @@ export class TablaTarjeta extends LitElement {
               <td>${t.nombre ?? ''}</td>
               <td>${t.diaCorte ?? ''}</td>
               <td>${t.diaPago ?? ''}</td>
+              <td class="acciones">
+                <button class="btn-editar" @click="${() => this.#editarTarjeta(t)}" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn-eliminar" @click="${() => this.#eliminarTarjeta(t.id)}" title="Eliminar">
+                  🗑️
+                </button>
+              </td>
             </tr>
           `)}
         </tbody>
@@ -69,24 +79,64 @@ export class TablaTarjeta extends LitElement {
     `;
   }
 
-
- 
-  #abrirModal() {
+  #abrirModal(tarjeta = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-tarjeta');
     if (modal) {
-      modal.abrir();
+      if (tarjeta) {
+        modal.abrirParaEditar(tarjeta);
+      } else {
+        modal.abrir();
+      }
+    }
+  }
+
+  #editarTarjeta(tarjeta) {
+    this.#abrirModal(tarjeta);
+  }
+
+  #eliminarTarjeta(id) {
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
+      this.tarjetas = this.tarjetas.filter(t => t.id !== id);
+
+      this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
+        detail: this.tarjetas
+      }));
     }
   }
 
   #manejarTarjetaAgregada(e) {
     const nuevaTarjeta = e.detail;
+    const existe = this.tarjetas.find(t => t.id === nuevaTarjeta.id);
+    if (existe) {
+      return;
+    }
+
+    if (!nuevaTarjeta.id) {
+      nuevaTarjeta.id = Date.now();
+    }
     this.tarjetas = [...this.tarjetas, nuevaTarjeta];
-    console.log(this.tarjetas);
-    
-    // Emitir evento para que el componente padre sepa del cambio
+    console.log('Tarjeta agregada:', nuevaTarjeta);
+
     this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
       detail: this.tarjetas
     }));
+  }
+
+  #manejarTarjetaEditada(e) {
+    const tarjetaEditada = e.detail;
+    const index = this.tarjetas.findIndex(t => t.id === tarjetaEditada.id);
+    if (index !== -1) {
+      this.tarjetas = [
+        ...this.tarjetas.slice(0, index),
+        tarjetaEditada,
+        ...this.tarjetas.slice(index + 1)
+      ];
+      console.log('Tarjeta editada:', tarjetaEditada);
+
+      this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
+        detail: this.tarjetas
+      }));
+    }
   }
 
   #manejarModalCerrado() {
@@ -95,8 +145,9 @@ export class TablaTarjeta extends LitElement {
 
   get #renderModalTarjeta() {
     return html`
-      <modal-agregar-tarjeta 
+      <modal-agregar-tarjeta
         @tarjeta-agregada="${this.#manejarTarjetaAgregada}"
+        @tarjeta-editada="${this.#manejarTarjetaEditada}"
         @modal-cerrado="${this.#manejarModalCerrado}">
       </modal-agregar-tarjeta>
     `;
