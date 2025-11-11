@@ -74,10 +74,10 @@ export class TablaTipoGasto extends LitElement {
   #abrirModal(tipoGasto = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-tipo-gasto');
     if (modal) {
-      if (tipoGasto) {
-        modal.abrirParaEditar(tipoGasto);
-      } else {
+      if (typeof tipoGasto.detail === 'number' ) {
         modal.abrir();
+      } else {
+        modal.abrirParaEditar(tipoGasto);
       }
     }
   }
@@ -89,6 +89,7 @@ export class TablaTipoGasto extends LitElement {
   #eliminarTipoGasto(id) {
     if (confirm('¿Estás seguro de que quieres eliminar este tipo de gasto?')) {
       this.tiposGasto = this.tiposGasto.filter(t => t.id !== id);
+      this.requestUpdate();
 
       this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
         detail: this.tiposGasto
@@ -107,6 +108,7 @@ export class TablaTipoGasto extends LitElement {
       nuevoTipoGasto.id = Date.now();
     }
     this.tiposGasto = [...this.tiposGasto, nuevoTipoGasto];
+    this.requestUpdate();
     console.log('Tipo de gasto agregado:', nuevoTipoGasto);
 
     this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
@@ -123,6 +125,7 @@ export class TablaTipoGasto extends LitElement {
         tipoGastoEditado,
         ...this.tiposGasto.slice(index + 1)
       ];
+      this.requestUpdate();
       console.log('Tipo de gasto editado:', tipoGastoEditado);
 
       this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
@@ -137,7 +140,7 @@ export class TablaTipoGasto extends LitElement {
 
   get #renderModalTipoGasto() {
     return html`
-      <modal-agregar-tipo-gasto 
+      <modal-agregar-tipo-gasto
         @tipo-gasto-agregado="${this.#manejarTipoGastoAgregado}"
         @tipo-gasto-editado="${this.#manejarTipoGastoEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">

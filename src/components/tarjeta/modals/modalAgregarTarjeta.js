@@ -88,19 +88,6 @@ export class ModalAgregarTarjeta extends LitElement {
     `;
   }
 
-  render() {
-    if (!this.abierto) return nothing;
-
-    return html`
-      <div class="modal-overlay" @click="${this.#cerrarModal}">
-        <div class="modal-content" @click="${this.#evitarCierre}">
-          ${this.#renderHeader} ${this.#renderForm}
-        </div>
-      </div>
-    `;
-  }
-
-
   #evitarCierre(e) {
     e.stopPropagation();
   }
@@ -116,7 +103,6 @@ export class ModalAgregarTarjeta extends LitElement {
       diaPago: formData.get("diaPago"),
     };
 
-    // Emitir evento según el modo
     if (this.modoEdicion) {
       this.dispatchEvent(
         new CustomEvent("tarjeta-editada", {
@@ -138,9 +124,12 @@ export class ModalAgregarTarjeta extends LitElement {
 
   // Método público para abrir el modal
   abrir() {
+    // Resetear todo el estado primero
     this.modoEdicion = false;
     this.tarjetaEditando = null;
+    // Luego abrir
     this.abierto = true;
+    this.requestUpdate();
   }
 
   // Método público para cerrar el modal
@@ -152,16 +141,33 @@ export class ModalAgregarTarjeta extends LitElement {
 
   // Método público para abrir el modal en modo edición
   abrirParaEditar(tarjeta) {
+    // Establecer el estado de edición
     this.modoEdicion = true;
     this.tarjetaEditando = { ...tarjeta };
+    // Luego abrir
     this.abierto = true;
+    this.requestUpdate();
   }
 
   #cerrarModal() {
+    // Resetear todo el estado al cerrar
     this.abierto = false;
     this.modoEdicion = false;
     this.tarjetaEditando = null;
     this.dispatchEvent(new CustomEvent("modal-cerrado"));
+    this.requestUpdate();
+  }
+
+  render() {
+    if (!this.abierto) return nothing;
+
+    return html`
+      <div class="modal-overlay" @click="${this.#cerrarModal}">
+        <div class="modal-content" @click="${this.#evitarCierre}">
+          ${this.#renderHeader} ${this.#renderForm}
+        </div>
+      </div>
+    `;
   }
 }
 

@@ -82,10 +82,10 @@ export class TablaTarjeta extends LitElement {
   #abrirModal(tarjeta = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-tarjeta');
     if (modal) {
-      if (tarjeta) {
-        modal.abrirParaEditar(tarjeta);
-      } else {
+      if (typeof tarjeta.detail === 'number' ) {
         modal.abrir();
+      } else {
+        modal.abrirParaEditar(tarjeta);
       }
     }
   }
@@ -97,6 +97,7 @@ export class TablaTarjeta extends LitElement {
   #eliminarTarjeta(id) {
     if (confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
       this.tarjetas = this.tarjetas.filter(t => t.id !== id);
+      this.requestUpdate();
 
       this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
         detail: this.tarjetas
@@ -115,6 +116,7 @@ export class TablaTarjeta extends LitElement {
       nuevaTarjeta.id = Date.now();
     }
     this.tarjetas = [...this.tarjetas, nuevaTarjeta];
+    this.requestUpdate();
     console.log('Tarjeta agregada:', nuevaTarjeta);
 
     this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
@@ -131,6 +133,7 @@ export class TablaTarjeta extends LitElement {
         tarjetaEditada,
         ...this.tarjetas.slice(index + 1)
       ];
+      this.requestUpdate();
       console.log('Tarjeta editada:', tarjetaEditada);
 
       this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
