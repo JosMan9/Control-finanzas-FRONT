@@ -1,7 +1,7 @@
 export const tipoGastoMock = [
     {
         id: 1,
-        nombre: 'Quincena'
+        nombre: 'Sueldo y prestaciones'
     },
     {
         id: 2,
@@ -9,10 +9,6 @@ export const tipoGastoMock = [
     },
     {
         id: 3,
-        nombre: 'Aguinaldo'
-    },
-    {
-        id: 4,
         nombre: 'Otros'
     }
 ];
