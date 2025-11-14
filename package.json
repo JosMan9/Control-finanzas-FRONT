@@ -1,5 +1,5 @@
 {
-  "name": "@control-gastos/componentes-lit",
+  "name": "control-finanzas-componentes-lit",
   "version": "1.0.0",
   "description": "Componentes Lit para el proyecto de control de gastos",
   "main": "dist/control-finanzas.cjs",
