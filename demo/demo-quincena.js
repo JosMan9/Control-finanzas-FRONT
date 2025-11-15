@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/quincena/tablaQuincena.js';
 import { html, render } from 'lit';
 import { quincenaMock } from '../src/mocks/quincenaMock.js';
