@@ -6,8 +6,8 @@
   "module": "dist/control-gastos-componentes-lit.es.js",
   "exports": {
     ".": {
-      "import": "./dist/control-gastos-componentes-lit.es.js",
-      "default": "./dist/control-gastos-componentes-lit.es.js"
+      "import": "./dist/control-gastos-componentes-lit.js",
+      "default": "./dist/control-gastos-componentes-lit.js"
     }
   },
   "files": ["dist"],
