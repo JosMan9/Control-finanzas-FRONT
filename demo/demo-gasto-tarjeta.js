@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/gastoTarjeta/tablaGastoTarjeta.js';
 import { html, render } from 'lit';
 import { gastoTarjetaMock } from '../src/mocks/gastoTarjetaMock.js';

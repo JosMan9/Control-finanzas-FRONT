@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/ingreso/tablaIngreso.js';
 import { html, render } from 'lit';
 import { ingresoMock } from '../src/mocks/ingresoMock.js';

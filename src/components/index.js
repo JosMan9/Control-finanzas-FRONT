@@ -1,7 +1,7 @@
-export * from './tarjeta/tablaTarjeta.js';
-export * from './tipoGasto/tablaTipoGasto.js';
-export * from './quincena/tablaQuincena.js';
-export * from './periodicidad/tablaPeriodicidad.js';
-export * from './gasto/tablaGasto.js';
-export * from './gastoTarjeta/tablaGastoTarjeta.js';
-export * from './ingreso/tablaIngreso.js';
+import './tarjeta/tablaTarjeta.js';
+import './tipoGasto/tablaTipoGasto.js';
+import './quincena/tablaQuincena.js';
+import './periodicidad/tablaPeriodicidad.js';
+import './gasto/tablaGasto.js';
+import './gastoTarjeta/tablaGastoTarjeta.js';
+import './ingreso/tablaIngreso.js';

@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/tarjeta/tablaTarjeta.js';
 import { html, render } from 'lit';
 import { tarjetaMock } from '../src/mocks/tarjetaMock.js';

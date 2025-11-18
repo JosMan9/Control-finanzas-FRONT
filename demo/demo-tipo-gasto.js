@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/tipoGasto/tablaTipoGasto.js';
 import { html, render } from 'lit';
 import { tipoGastoMock } from '../src/mocks/tipoGastoMock.js';

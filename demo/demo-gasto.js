@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/gasto/tablaGasto.js';
 import { html, render } from 'lit';
 import { gastoMock } from '../src/mocks/gastoMock.js';

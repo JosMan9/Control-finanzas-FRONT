@@ -1,24 +1,26 @@
 {
+  "name": "control-gastos-componentes-lit",
+  "version": "1.0.3",
   "name": "control-finanzas-componentes-lit",
-  "version": "1.0.0",
   "description": "Componentes Lit para el proyecto de control de gastos",
-  "main": "dist/control-finanzas.cjs",
-  "module": "dist/control-finanzas.js",
   "type": "module",
+  "module": "dist/control-gastos-componentes-lit.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/control-gastos-componentes-lit.js",
+      "default": "./dist/control-gastos-componentes-lit.js"
+    }
+  },
   "files": ["dist"],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "lit": "^3.3.1"
   },
   "devDependencies": {
-    "@webcomponents/scoped-custom-element-registry": "^0.0.9",
     "vite": "^7.1.11"
   }
 }

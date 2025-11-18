@@ -1,4 +1,3 @@
-import '@webcomponents/scoped-custom-element-registry';
 import '../src/components/periodicidad/tablaPeriodicidad.js';
 import { html, render } from 'lit';
 import { periodicidadMock } from '../src/mocks/periodicidadMock.js';
