@@ -1,6 +1,6 @@
 {
   "name": "control-gastos-componentes-lit",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "description": "Componentes Lit para el proyecto de control de gastos",
   "type": "module",
   "module": "dist/control-gastos-componentes-lit.es.js",

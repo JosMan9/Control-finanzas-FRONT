@@ -126,6 +126,10 @@ export class TablaGastoTarjeta extends LitElement {
       this.dispatchEvent(new CustomEvent('gastos-tarjeta-actualizados', {
         detail: this.gastosTarjeta
       }));
+
+      this.dispatchEvent(new CustomEvent('gasto-tarjeta-eliminado-id', {
+        detail: id
+      }));
     }
   }
 
@@ -146,6 +150,10 @@ export class TablaGastoTarjeta extends LitElement {
     this.dispatchEvent(new CustomEvent('gastos-tarjeta-actualizados', {
       detail: this.gastosTarjeta
     }));
+
+    this.dispatchEvent(new CustomEvent('gasto-tarjeta-creada', {
+      detail: nuevoGastoTarjeta
+    }));
   }
 
   #manejarGastoTarjetaEditado(e) {
@@ -162,6 +170,10 @@ export class TablaGastoTarjeta extends LitElement {
 
       this.dispatchEvent(new CustomEvent('gastos-tarjeta-actualizados', {
         detail: this.gastosTarjeta
+      }));
+
+      this.dispatchEvent(new CustomEvent('gasto-tarjeta-actualizado', {
+        detail: gastoTarjetaEditado
       }));
     }
   }

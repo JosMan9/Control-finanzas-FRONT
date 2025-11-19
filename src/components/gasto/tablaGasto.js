@@ -124,6 +124,10 @@ export class TablaGasto extends LitElement {
       this.dispatchEvent(new CustomEvent('gastos-actualizados', {
         detail: this.gastos
       }));
+
+      this.dispatchEvent(new CustomEvent('gasto-eliminado-id', {
+        detail: id
+      }));
     }
   }
 
@@ -144,6 +148,10 @@ export class TablaGasto extends LitElement {
     this.dispatchEvent(new CustomEvent('gastos-actualizados', {
       detail: this.gastos
     }));
+
+    this.dispatchEvent(new CustomEvent('gasto-agregado', {
+      detail: nuevoGasto
+    }));
   }
 
   #manejarGastoEditado(e) {
@@ -160,6 +168,10 @@ export class TablaGasto extends LitElement {
 
       this.dispatchEvent(new CustomEvent('gastos-actualizados', {
         detail: this.gastos
+      }));
+
+      this.dispatchEvent(new CustomEvent('gasto-actualizado', {
+        detail: gastoEditado
       }));
     }
   }

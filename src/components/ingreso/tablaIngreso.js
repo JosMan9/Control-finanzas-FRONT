@@ -110,6 +110,10 @@ export class TablaIngreso extends LitElement {
       this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
         detail: this.ingresos
       }));
+
+      this.dispatchEvent(new CustomEvent('ingreso-eliminado-id', {
+        detail: id
+      }));
     }
   }
 
@@ -130,6 +134,10 @@ export class TablaIngreso extends LitElement {
     this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
       detail: this.ingresos
     }));
+
+    this.dispatchEvent(new CustomEvent('ingreso-creado', {
+      detail: nuevoIngreso
+    }));
   }
 
   #manejarIngresoEditado(e) {
@@ -146,6 +154,10 @@ export class TablaIngreso extends LitElement {
 
       this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
         detail: this.ingresos
+      }));
+
+      this.dispatchEvent(new CustomEvent('ingreso-actualizado', {
+        detail: ingresoEditado
       }));
     }
   }

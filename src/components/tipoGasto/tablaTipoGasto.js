@@ -94,6 +94,10 @@ export class TablaTipoGasto extends LitElement {
       this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
         detail: this.tiposGasto
       }));
+
+      this.dispatchEvent(new CustomEvent('tipo-gasto-eliminado', {
+        detail: id
+      }));
     }
   }
 
@@ -114,6 +118,10 @@ export class TablaTipoGasto extends LitElement {
     this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
       detail: this.tiposGasto
     }));
+
+    this.dispatchEvent(new CustomEvent('tipo-gasto-creado', {
+      detail: nuevoTipoGasto
+    }));
   }
 
   #manejarTipoGastoEditado(e) {
@@ -130,6 +138,10 @@ export class TablaTipoGasto extends LitElement {
 
       this.dispatchEvent(new CustomEvent('tipos-gasto-actualizados', {
         detail: this.tiposGasto
+      }));
+
+      this.dispatchEvent(new CustomEvent('tipo-gasto-actualizado', {
+        detail: tipoGastoEditado
       }));
     }
   }

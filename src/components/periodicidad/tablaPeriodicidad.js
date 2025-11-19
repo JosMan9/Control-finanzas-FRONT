@@ -102,6 +102,10 @@ export class TablaPeriodicidad extends LitElement {
       this.dispatchEvent(new CustomEvent('periodicidades-actualizadas', {
         detail: this.periodicidades
       }));
+
+      this.dispatchEvent(new CustomEvent('periodicidad-eliminado-id', {
+        detail: id
+      }));
     }
   }
 
@@ -122,6 +126,10 @@ export class TablaPeriodicidad extends LitElement {
     this.dispatchEvent(new CustomEvent('periodicidades-actualizadas', {
       detail: this.periodicidades
     }));
+
+    this.dispatchEvent(new CustomEvent('periodicidad-creada', {
+      detail: nuevaPeriodicidad
+    }));
   }
 
   #manejarPeriodicidadEditada(e) {
@@ -138,6 +146,10 @@ export class TablaPeriodicidad extends LitElement {
 
       this.dispatchEvent(new CustomEvent('periodicidades-actualizadas', {
         detail: this.periodicidades
+      }));
+
+      this.dispatchEvent(new CustomEvent('periodicidad-actualizada', {
+        detail: periodicidadEditada
       }));
     }
   }
