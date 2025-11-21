@@ -10,6 +10,7 @@ export class TablaGastoTarjeta extends LitElement {
     tarjetas: { type: Array },
     gastos: { type: Array },
     cargando: { type: Boolean },
+    meses: { type: Array },
   };
 
   static styles = [tablaGastoTarjetaStyles];
@@ -21,10 +22,17 @@ export class TablaGastoTarjeta extends LitElement {
     this.tarjetas = [];
     this.gastos = [];
     this.cargando = false;
+    this.meses = [];
   }
 
-  #obtenerNombreMes(numeroMes) {
-    return numeroMes || 'N/A';
+  convertidorFecha(fechaString) {
+    if (!fechaString) return 'N/A';
+    const date = new Date(fechaString);
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${y}-${m}-${d}`;
   }
 
   get #renderSkeleton() {
@@ -66,21 +74,30 @@ export class TablaGastoTarjeta extends LitElement {
       <table>
         <thead>
           <tr>
+            <th>Mes de Corte</th>
             <th>Mes Actual</th>
             <th>Mes Final</th>
-            <th>Tarjeta</th>
+            <th>Nombre Tarjeta</th>
+            <th>Dia Pago</th>
             <th>Es Mío</th>
             <th>Cantidad Abonada</th>
-            <th>Gasto</th>
+            <th>Concepto</th>
+            <th>Monto</th>
+            <th>Fecha Operación</th>
+            <th>Es Cubierto</th>
+            <th>Nombre Quincena</th>
+            <th>Fecha Quincena</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           ${this.gastosTarjeta.map(gt => html`
             <tr>
-              <td>${this.#obtenerNombreMes(gt.mesActual)}</td>
-              <td>${this.#obtenerNombreMes(gt.mesFinal)}</td>
+              <td>${gt.mes?.nombre ?? 'N/A'}</td>
+              <td>${gt.mesActual}</td>
+              <td>${gt.mesFinal}</td>
               <td>${gt.tarjeta?.nombre ?? 'N/A'}</td>
+              <td>${gt.tarjeta?.diaPago ?? 'N/A'}</td>
               <td>
                 <span class="badge ${gt.esMio ? 'badge-mio' : 'badge-no-mio'}">
                   ${gt.esMio ? 'Sí' : 'No'}
@@ -88,6 +105,15 @@ export class TablaGastoTarjeta extends LitElement {
               </td>
               <td>$${gt.cantidadAbonada?.toLocaleString('es-MX') ?? '0'}</td>
               <td>${gt.gasto?.concepto ?? 'N/A'}</td>
+              <td>$${gt.gasto?.monto?.toFixed(2) ?? '0.00'}</td>
+              <td>${this.convertidorFecha(gt.gasto?.fechaOperacion)}</td>
+              <td>
+                <span class="badge ${gt.gasto?.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
+                  ${gt.gasto?.esCubierto ? 'Cubierto' : 'No Cubierto'}
+                </span>
+              </td>
+              <td>${gt.gasto?.ingreso?.quincena?.nombre ?? 'N/A'}</td>
+              <td>${this.convertidorFecha(gt.gasto?.ingreso?.quincena?.fecha)}</td>
               <td class="acciones">
                 <button class="btn-editar" @click="${() => this.#editarGastoTarjeta(gt)}" title="Editar">
                   ✏️
@@ -106,7 +132,7 @@ export class TablaGastoTarjeta extends LitElement {
   #abrirModal(gastoTarjeta = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-gasto-tarjeta');
     if (modal) {
-      if (typeof gastoTarjeta === 'number' || !gastoTarjeta) {
+      if (typeof gastoTarjeta.detail === 'number' || !gastoTarjeta) {
         modal.abrir();
       } else {
         modal.abrirParaEditar(gastoTarjeta);
@@ -187,6 +213,7 @@ export class TablaGastoTarjeta extends LitElement {
       <modal-agregar-gasto-tarjeta
         .tarjetas="${this.tarjetas}"
         .gastos="${this.gastos}"
+        .meses="${this.meses}"
         @gasto-tarjeta-agregado="${this.#manejarGastoTarjetaAgregado}"
         @gasto-tarjeta-editado="${this.#manejarGastoTarjetaEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">

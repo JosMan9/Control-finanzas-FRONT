@@ -3,11 +3,13 @@ import { html, render } from 'lit';
 import { gastoTarjetaMock } from '../src/mocks/gastoTarjetaMock.js';
 import { tarjetaMock } from '../src/mocks/tarjetaMock.js';
 import { gastoMock } from '../src/mocks/gastoMock.js';
+import { mesMock } from '../src/mocks/mesMock.js';
 
 const demo = document.getElementById('demo');
 const gastosTarjeta = gastoTarjetaMock;
 const tarjetas = tarjetaMock;
 const gastos = gastoMock;
+const meses = mesMock;
 
 const tablaGastoTarjetaComponent = () => html`
     <tabla-gasto-tarjeta
@@ -16,6 +18,7 @@ const tablaGastoTarjetaComponent = () => html`
         .gastosTarjeta="${gastosTarjeta}"
         .tarjetas="${tarjetas}"
         .gastos="${gastos}"
+        .meses="${meses}"
         @gastos-tarjeta-actualizados="${(e) => {
             console.log('Gastos tarjeta actualizados:', e.detail);
         }}">

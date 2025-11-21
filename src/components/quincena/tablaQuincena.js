@@ -1,7 +1,6 @@
-import { LitElement, html } from 'lit';
-import { tablaQuincenaStyles } from './tablaQuincena.styles.js';
-import './modals/modalAgregarQuincena.js';
-
+import { LitElement, html } from "lit";
+import { tablaQuincenaStyles } from "./tablaQuincena.styles.js";
+import "./modals/modalAgregarQuincena.js";
 
 export class TablaQuincena extends LitElement {
   static properties = {
@@ -14,7 +13,7 @@ export class TablaQuincena extends LitElement {
 
   constructor() {
     super();
-    this.titulo = 'Quincenas';
+    this.titulo = "Quincenas";
     this.quincenas = [];
     this.cargando = false;
   }
@@ -24,19 +23,36 @@ export class TablaQuincena extends LitElement {
       <table>
         <thead>
           <tr>
-            <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
-            <th><span class="skeleton" style="display:inline-block;width:140px;"></span></th>
-            <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
+            <th>
+              <span
+                class="skeleton"
+                style="display:inline-block;width:120px;"
+              ></span>
+            </th>
+            <th>
+              <span
+                class="skeleton"
+                style="display:inline-block;width:140px;"
+              ></span>
+            </th>
+            <th>
+              <span
+                class="skeleton"
+                style="display:inline-block;width:80px;"
+              ></span>
+            </th>
           </tr>
         </thead>
         <tbody>
-          ${Array.from({ length: 4 }).map(() => html`
-            <tr>
-              <td><div class="skeleton" style="width:100%;"></div></td>
-              <td><div class="skeleton" style="width:100%;"></div></td>
-              <td><div class="skeleton" style="width:60px;"></div></td>
-            </tr>
-          `)}
+          ${Array.from({ length: 4 }).map(
+            () => html`
+              <tr>
+                <td><div class="skeleton" style="width:100%;"></div></td>
+                <td><div class="skeleton" style="width:100%;"></div></td>
+                <td><div class="skeleton" style="width:60px;"></div></td>
+              </tr>
+            `
+          )}
         </tbody>
       </table>
     `;
@@ -56,29 +72,39 @@ export class TablaQuincena extends LitElement {
           </tr>
         </thead>
         <tbody>
-          ${this.quincenas.map(q => html`
-            <tr>
-              <td>${q.nombre ?? ''}</td>
-              <td>${this.convertidorFecha(q.fecha) ?? ''}</td>
-              <td class="acciones">
-                <button class="btn-editar" @click="${() => this.#editarQuincena(q)}" title="Editar">
-                  ✏️
-                </button>
-                <button class="btn-eliminar" @click="${() => this.#eliminarQuincena(q.id)}" title="Eliminar">
-                  🗑️
-                </button>
-              </td>
-            </tr>
-          `)}
+          ${this.quincenas.map(
+            (q) => html`
+              <tr>
+                <td>${q.nombre ?? ""}</td>
+                <td>${this.convertidorFecha(q.fecha) ?? ""}</td>
+                <td class="acciones">
+                  <button
+                    class="btn-editar"
+                    @click="${() => this.#editarQuincena(q)}"
+                    title="Editar"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    class="btn-eliminar"
+                    @click="${() => this.#eliminarQuincena(q.id)}"
+                    title="Eliminar"
+                  >
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            `
+          )}
         </tbody>
       </table>
     `;
   }
 
   #abrirModal(quincena = null) {
-    const modal = this.shadowRoot.querySelector('modal-agregar-quincena');
+    const modal = this.shadowRoot.querySelector("modal-agregar-quincena");
     if (modal) {
-      if (typeof quincena.detail === 'number' ) {
+      if (typeof quincena.detail === "number") {
         modal.abrir();
       } else {
         modal.abrirParaEditar(quincena);
@@ -91,23 +117,27 @@ export class TablaQuincena extends LitElement {
   }
 
   #eliminarQuincena(id) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta quincena?')) {
-      this.quincenas = this.quincenas.filter(q => q.id !== id);
+    if (confirm("¿Estás seguro de que quieres eliminar esta quincena?")) {
+      this.quincenas = this.quincenas.filter((q) => q.id !== id);
       this.requestUpdate();
 
-      this.dispatchEvent(new CustomEvent('quincenas-actualizadas', {
-        detail: this.quincenas
-      }));
+      this.dispatchEvent(
+        new CustomEvent("quincenas-actualizadas", {
+          detail: this.quincenas,
+        })
+      );
 
-      this.dispatchEvent(new CustomEvent('quincena-eliminada-id', {
-        detail: id
-      }));
+      this.dispatchEvent(
+        new CustomEvent("quincena-eliminada-id", {
+          detail: id,
+        })
+      );
     }
   }
 
   #manejarQuincenaAgregada(e) {
     const nuevaQuincena = e.detail;
-    const existe = this.quincenas.find(q => q.id === nuevaQuincena.id);
+    const existe = this.quincenas.find((q) => q.id === nuevaQuincena.id);
     if (existe) {
       return;
     }
@@ -117,36 +147,44 @@ export class TablaQuincena extends LitElement {
     }
     this.quincenas = [...this.quincenas, nuevaQuincena];
     this.requestUpdate();
-    console.log('Quincena agregada:', nuevaQuincena);
+    console.log("Quincena agregada:", nuevaQuincena);
 
-    this.dispatchEvent(new CustomEvent('quincenas-actualizadas', {
-      detail: this.quincenas
-    }));
+    this.dispatchEvent(
+      new CustomEvent("quincenas-actualizadas", {
+        detail: this.quincenas,
+      })
+    );
 
-    this.dispatchEvent(new CustomEvent('quincena-creada', {
-      detail: nuevaQuincena
-    }));
+    this.dispatchEvent(
+      new CustomEvent("quincena-creada", {
+        detail: nuevaQuincena,
+      })
+    );
   }
 
   #manejarQuincenaEditada(e) {
     const quincenaEditada = e.detail;
-    const index = this.quincenas.findIndex(q => q.id === quincenaEditada.id);
+    const index = this.quincenas.findIndex((q) => q.id === quincenaEditada.id);
     if (index !== -1) {
       this.quincenas = [
         ...this.quincenas.slice(0, index),
         quincenaEditada,
-        ...this.quincenas.slice(index + 1)
+        ...this.quincenas.slice(index + 1),
       ];
       this.requestUpdate();
-      console.log('Quincena editada:', quincenaEditada);
+      console.log("Quincena editada:", quincenaEditada);
 
-      this.dispatchEvent(new CustomEvent('quincenas-actualizadas', {
-        detail: this.quincenas
-      }));
+      this.dispatchEvent(
+        new CustomEvent("quincenas-actualizadas", {
+          detail: this.quincenas,
+        })
+      );
 
-      this.dispatchEvent(new CustomEvent('quincena-actualizada', {
-        detail: quincenaEditada
-      }));
+      this.dispatchEvent(
+        new CustomEvent("quincena-actualizada", {
+          detail: quincenaEditada,
+        })
+      );
     }
   }
 
@@ -159,7 +197,8 @@ export class TablaQuincena extends LitElement {
       <modal-agregar-quincena
         @quincena-agregada="${this.#manejarQuincenaAgregada}"
         @quincena-editada="${this.#manejarQuincenaEditada}"
-        @modal-cerrado="${this.#manejarModalCerrado}">
+        @modal-cerrado="${this.#manejarModalCerrado}"
+      >
       </modal-agregar-quincena>
     `;
   }
@@ -178,30 +217,22 @@ export class TablaQuincena extends LitElement {
     `;
   }
 
-   convertidorFecha(fechaString) {
-    const [year, month, day] = fechaString.split('-').map(Number);
-    const date = new Date(year, month - 1, day); // Fecha local (sin UTC)
-  
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-  
+  convertidorFecha(fechaString) {
+    const date = new Date(fechaString);
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+
     return `${y}-${m}-${d}`;
   }
-  
-
 
   render() {
     return html`
       ${this.#renderHeader}
-      ${this.cargando
-        ? this.#renderSkeleton
-        : this.#renderTabla}
-    ${this.#renderModalQuincena}
+      ${this.cargando ? this.#renderSkeleton : this.#renderTabla}
+      ${this.#renderModalQuincena}
     `;
   }
-
 }
 
-customElements.define('tabla-quincena', TablaQuincena);
-
+customElements.define("tabla-quincena", TablaQuincena);

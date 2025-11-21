@@ -131,6 +131,14 @@ tbody tr:hover {
   background-color: #f3f4f6;
   color: #4b5563;
 }
+.badge-cubierto {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+.badge-no-cubierto {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
 
 
 `;

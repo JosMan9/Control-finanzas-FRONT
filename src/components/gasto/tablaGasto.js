@@ -9,7 +9,6 @@ export class TablaGasto extends LitElement {
     gastos: { type: Array },
     ingresos: { type: Array },
     tipoGastos: { type: Array },
-    quincenas: { type: Array },
     cargando: { type: Boolean },
   };
 
@@ -21,7 +20,6 @@ export class TablaGasto extends LitElement {
     this.gastos = [];
     this.ingresos = [];
     this.tipoGastos = [];
-    this.quincenas = [];
     this.cargando = false;
   }
 
@@ -65,6 +63,7 @@ export class TablaGasto extends LitElement {
         <thead>
           <tr>
             <th>Concepto</th>
+            <th>Monto</th>
             <th>Fecha</th>
             <th>Ingreso</th>
             <th>Tipo de Gasto</th>
@@ -77,10 +76,11 @@ export class TablaGasto extends LitElement {
           ${this.gastos.map(g => html`
             <tr>
               <td>${g.concepto ?? ''}</td>
-              <td>${g.fecha ?? 'N/A'}</td>
+              <td>$${g.monto?.toFixed(2) ?? '0.00'}</td>
+              <td>${this.convertidorFecha(g.fechaOperacion) ?? 'N/A'}</td>
               <td>${g.ingreso?.nombre ?? 'N/A'}</td>
               <td>${g.tipoGasto?.nombre ?? 'N/A'}</td>
-              <td>${g.quincena?.nombre ?? 'N/A'}</td>
+              <td>${g.ingreso.quincena?.nombre ?? 'N/A'}</td>
               <td>
                 <span class="badge ${g.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
                   ${g.esCubierto ? 'Cubierto' : 'No Cubierto'}
@@ -104,7 +104,7 @@ export class TablaGasto extends LitElement {
   #abrirModal(gasto = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-gasto');
     if (modal) {
-      if (typeof gasto === 'number' || !gasto) {
+      if (typeof gasto.detail === 'number' || !gasto) {
         modal.abrir();
       } else {
         modal.abrirParaEditar(gasto);
@@ -185,7 +185,6 @@ export class TablaGasto extends LitElement {
       <modal-agregar-gasto
         .ingresos="${this.ingresos}"
         .tipoGastos="${this.tipoGastos}"
-        .quincenas="${this.quincenas}"
         @gasto-agregado="${this.#manejarGastoAgregado}"
         @gasto-editado="${this.#manejarGastoEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">
@@ -207,6 +206,14 @@ export class TablaGasto extends LitElement {
     `;
   }
 
+  convertidorFecha(fechaString) {
+    const date = new Date(fechaString);
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${y}-${m}-${d}`;
+  }
 
   render() {
     return html`
