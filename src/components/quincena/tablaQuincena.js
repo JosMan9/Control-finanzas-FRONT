@@ -223,7 +223,7 @@ export class TablaQuincena extends LitElement {
     const m = String(date.getUTCMonth() + 1).padStart(2, "0");
     const d = String(date.getUTCDate()).padStart(2, "0");
 
-    return `${y}-${m}-${d}`;
+    return `${d}/${m}/${y}`;
   }
 
   render() {

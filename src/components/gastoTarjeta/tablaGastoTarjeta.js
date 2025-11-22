@@ -11,6 +11,12 @@ export class TablaGastoTarjeta extends LitElement {
     gastos: { type: Array },
     cargando: { type: Boolean },
     meses: { type: Array },
+    filtroMesCorte: { type: String },
+    filtroEsMio: { type: String },
+    filtroEsCubierto: { type: String },
+    filtroQuincena: { type: String },
+    filtroTarjeta: { type: String },
+    filtroAño: { type: String },
   };
 
   static styles = [tablaGastoTarjetaStyles];
@@ -23,6 +29,12 @@ export class TablaGastoTarjeta extends LitElement {
     this.gastos = [];
     this.cargando = false;
     this.meses = [];
+    this.filtroMesCorte = '';
+    this.filtroEsMio = '';
+    this.filtroEsCubierto = '';
+    this.filtroQuincena = '';
+    this.filtroTarjeta = '';
+    this.filtroAño = '';
   }
 
   convertidorFecha(fechaString) {
@@ -32,7 +44,7 @@ export class TablaGastoTarjeta extends LitElement {
     const m = String(date.getUTCMonth() + 1).padStart(2, "0");
     const d = String(date.getUTCDate()).padStart(2, "0");
 
-    return `${y}-${m}-${d}`;
+    return `${d}/${m}/${y}`;
   }
 
   get #renderSkeleton() {
@@ -74,29 +86,49 @@ export class TablaGastoTarjeta extends LitElement {
       <table>
         <thead>
           <tr>
+          <th>Concepto</th>
             <th>Mes de Corte</th>
             <th>Mes Actual</th>
             <th>Mes Final</th>
-            <th>Nombre Tarjeta</th>
             <th>Dia Pago</th>
             <th>Es Mío</th>
             <th>Cantidad Abonada</th>
-            <th>Concepto</th>
             <th>Monto</th>
             <th>Fecha Operación</th>
             <th>Es Cubierto</th>
             <th>Nombre Quincena</th>
             <th>Fecha Quincena</th>
+            <th>Nombre Tarjeta</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          ${this.gastosTarjeta.map(gt => html`
+          ${this.gastosTarjeta
+        .filter(gt => !this.filtroMesCorte || gt.mes?.nombre === this.filtroMesCorte)
+        .filter(gt => {
+          if (this.filtroEsMio === 'true') return gt.esMio;
+          if (this.filtroEsMio === 'false') return !gt.esMio;
+          return true;
+        })
+        .filter(gt => {
+          if (this.filtroEsCubierto === 'true') return gt.gasto?.esCubierto;
+          if (this.filtroEsCubierto === 'false') return !gt.gasto?.esCubierto;
+          return true;
+        })
+        .filter(gt => !this.filtroQuincena || gt.gasto?.ingreso?.quincena?.nombre === this.filtroQuincena)
+        .filter(gt => !this.filtroTarjeta || gt.tarjeta?.nombre === this.filtroTarjeta)
+        .filter(gt => {
+          if (!this.filtroAño) return true;
+          if (!gt.gasto?.fechaOperacion) return false;
+          const fecha = new Date(gt.gasto.fechaOperacion);
+          return fecha.getFullYear().toString() === this.filtroAño;
+        })
+        .map(gt => html`
             <tr>
+              <td>${gt.gasto?.concepto ?? 'N/A'}</td>
               <td>${gt.mes?.nombre ?? 'N/A'}</td>
               <td>${gt.mesActual}</td>
               <td>${gt.mesFinal}</td>
-              <td>${gt.tarjeta?.nombre ?? 'N/A'}</td>
               <td>${gt.tarjeta?.diaPago ?? 'N/A'}</td>
               <td>
                 <span class="badge ${gt.esMio ? 'badge-mio' : 'badge-no-mio'}">
@@ -104,7 +136,6 @@ export class TablaGastoTarjeta extends LitElement {
                 </span>
               </td>
               <td>$${gt.cantidadAbonada?.toLocaleString('es-MX') ?? '0'}</td>
-              <td>${gt.gasto?.concepto ?? 'N/A'}</td>
               <td>$${gt.gasto?.monto?.toFixed(2) ?? '0.00'}</td>
               <td>${this.convertidorFecha(gt.gasto?.fechaOperacion)}</td>
               <td>
@@ -114,6 +145,7 @@ export class TablaGastoTarjeta extends LitElement {
               </td>
               <td>${gt.gasto?.ingreso?.quincena?.nombre ?? 'N/A'}</td>
               <td>${this.convertidorFecha(gt.gasto?.ingreso?.quincena?.fecha)}</td>
+              <td>${gt.tarjeta?.nombre ?? 'N/A'}</td>
               <td class="acciones">
                 <button class="btn-editar" @click="${() => this.#editarGastoTarjeta(gt)}" title="Editar">
                   ✏️
@@ -208,6 +240,16 @@ export class TablaGastoTarjeta extends LitElement {
     // Opcional: manejar cuando se cierra el modal
   }
 
+  #resetearFiltros() {
+    this.filtroMesCorte = '';
+    this.filtroEsMio = '';
+    this.filtroEsCubierto = '';
+    this.filtroQuincena = '';
+    this.filtroTarjeta = '';
+    this.filtroAño = '';
+    this.requestUpdate();
+  }
+
   get #renderModalGastoTarjeta() {
     return html`
       <modal-agregar-gasto-tarjeta
@@ -225,28 +267,142 @@ export class TablaGastoTarjeta extends LitElement {
     return html`
       <div class="header">
         <h2>${this.titulo}</h2>
-        <div class="header-actions">
-          <button class="btn-agregar" @click="${this.#abrirModal}">
-            + Agregar Gasto Tarjeta
-          </button>
+        <div class="header-actions" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-agregar" @click="${this.#abrirModal}">
+              + Agregar Gasto Tarjeta
+            </button>
+            <button 
+              class="btn-reset" 
+              @click="${this.#resetearFiltros}"
+              style="padding: 8px 16px; border-radius: 4px; border: 1px solid #dc3545; background-color: #dc3545; color: white; cursor: pointer; font-weight: 500; transition: background-color 0.2s;"
+              onmouseover="this.style.backgroundColor='#c82333'"
+              onmouseout="this.style.backgroundColor='#dc3545'"
+            >
+              🗑️ Limpiar Filtros
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <select 
+              class="form-control" 
+              .value="${this.filtroMesCorte}"
+              @change="${e => this.filtroMesCorte = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los meses de corte</option>
+              ${this.uniqueMesesCorte.map(m => html`
+                <option value="${m}">${m}</option>
+              `)}
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroEsMio}"
+              @change="${e => this.filtroEsMio = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos (Es Mío)</option>
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroEsCubierto}"
+              @change="${e => this.filtroEsCubierto = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos (Es Cubierto)</option>
+              <option value="true">Cubierto</option>
+              <option value="false">No Cubierto</option>
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroQuincena}"
+              @change="${e => this.filtroQuincena = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las quincenas</option>
+              ${this.uniqueQuincenas.map(q => html`
+                <option value="${q}">${q}</option>
+              `)}
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroTarjeta}"
+              @change="${e => this.filtroTarjeta = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las tarjetas</option>
+              ${this.uniqueTarjetas.map(t => html`
+                <option value="${t}">${t}</option>
+              `)}
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroAño}"
+              @change="${e => this.filtroAño = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los años</option>
+              ${this.uniqueAños.map(a => html`
+                <option value="${a}">${a}</option>
+              `)}
+            </select>
+          </div>
           <slot name="acciones"></slot>
         </div>
       </div>
     `;
   }
 
+  get uniqueMesesCorte() {
+    const meses = new Set();
+    this.gastosTarjeta.forEach(gt => {
+      if (gt.mes?.nombre) {
+        meses.add(gt.mes.nombre);
+      }
+    });
+    return Array.from(meses);
+  }
+
+  get uniqueQuincenas() {
+    const quincenas = new Set();
+    this.gastosTarjeta.forEach(gt => {
+      if (gt.gasto?.ingreso?.quincena?.nombre) {
+        quincenas.add(gt.gasto.ingreso.quincena.nombre);
+      }
+    });
+    return Array.from(quincenas);
+  }
+
+  get uniqueTarjetas() {
+    const tarjetas = new Set();
+    this.gastosTarjeta.forEach(gt => {
+      if (gt.tarjeta?.nombre) {
+        tarjetas.add(gt.tarjeta.nombre);
+      }
+    });
+    return Array.from(tarjetas);
+  }
+
+  get uniqueAños() {
+    const años = new Set();
+    this.gastosTarjeta.forEach(gt => {
+      if (gt.gasto?.fechaOperacion) {
+        const fecha = new Date(gt.gasto.fechaOperacion);
+        años.add(fecha.getFullYear().toString());
+      }
+    });
+    return Array.from(años).sort();
+  }
 
   render() {
     return html`
       ${this.#renderHeader}
-      ${this.cargando
-        ? this.#renderSkeleton
-        : this.#renderTabla}
-    ${this.#renderModalGastoTarjeta}
-    `;
+      ${this.cargando ? this.#renderSkeleton : this.#renderTabla}
+      ${this.#renderModalGastoTarjeta}
+`;
   }
 
 }
 
 customElements.define('tabla-gasto-tarjeta', TablaGastoTarjeta);
-
