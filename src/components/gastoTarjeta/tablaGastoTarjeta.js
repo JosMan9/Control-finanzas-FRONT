@@ -104,7 +104,7 @@ export class TablaGastoTarjeta extends LitElement {
         </thead>
         <tbody>
           ${this.gastosTarjeta
-        .filter(gt => !this.filtroMesCorte || gt.mes?.nombre === this.filtroMesCorte)
+        .filter(gt => !this.filtroMesCorte || gt.mes?.nombreMes === this.filtroMesCorte)
         .filter(gt => {
           if (this.filtroEsMio === 'true') return gt.esMio;
           if (this.filtroEsMio === 'false') return !gt.esMio;
@@ -126,7 +126,7 @@ export class TablaGastoTarjeta extends LitElement {
         .map(gt => html`
             <tr>
               <td>${gt.gasto?.concepto ?? 'N/A'}</td>
-              <td>${gt.mes?.nombre ?? 'N/A'}</td>
+              <td>${gt.mes?.nombreMes ?? 'N/A'}</td>
               <td>${gt.mesActual}</td>
               <td>${gt.mesFinal}</td>
               <td>${gt.tarjeta?.diaPago ?? 'N/A'}</td>
@@ -357,8 +357,8 @@ export class TablaGastoTarjeta extends LitElement {
   get uniqueMesesCorte() {
     const meses = new Set();
     this.gastosTarjeta.forEach(gt => {
-      if (gt.mes?.nombre) {
-        meses.add(gt.mes.nombre);
+      if (gt.mes?.nombreMes) {
+        meses.add(gt.mes.nombreMes);
       }
     });
     return Array.from(meses);

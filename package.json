@@ -10,7 +10,9 @@
       "default": "./dist/control-gastos-componentes-lit.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
