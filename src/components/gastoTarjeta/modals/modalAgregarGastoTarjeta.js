@@ -9,6 +9,7 @@ export class ModalAgregarGastoTarjeta extends LitElement {
     gastoTarjetaEditando: { type: Object },
     tarjetas: { type: Array },
     gastos: { type: Array },
+    meses: { type: Array },
   };
 
   static styles = [modalStyles];
@@ -21,6 +22,7 @@ export class ModalAgregarGastoTarjeta extends LitElement {
     this.gastoTarjetaEditando = null;
     this.tarjetas = [];
     this.gastos = [];
+    this.meses = [];
   }
 
   get #renderHeader() {
@@ -51,6 +53,17 @@ export class ModalAgregarGastoTarjeta extends LitElement {
   get #renderForm() {
     return html`
       <form @submit="${this.#enviarFormulario}" class="modal-body">
+        <div class="campo">
+          <label for="mes">Mes:</label>
+          <select id="mes" name="mes" required>
+            <option value="">Seleccionar mes</option>
+            ${this.meses.map(m => {
+              const selected = this.gastoTarjetaEditando?.mes?.id === m.id ? 'selected' : '';
+              return html`<option value="${m.id}" ${selected}>${m.nombre}</option>`;
+            })}
+          </select>
+        </div>
+
         <div class="campo">
           <label for="mesActual">Mes Actual:</label>
           <input
@@ -158,8 +171,12 @@ export class ModalAgregarGastoTarjeta extends LitElement {
     const tarjetaSeleccionada = this.tarjetas.find(t => t.id === tarjetaId);
     const gastoSeleccionado = this.gastos.find(g => g.id === gastoId);
 
+    const mesId = parseInt(formData.get("mes"));
+    const mesSeleccionado = this.meses.find(m => m.id === mesId);
+
     const gastoTarjeta = {
       id: this.modoEdicion ? this.gastoTarjetaEditando.id : Date.now(),
+      mes: mesSeleccionado,
       mesActual: parseInt(formData.get("mesActual")),
       mesFinal: parseInt(formData.get("mesFinal")),
       tarjeta: tarjetaSeleccionada,

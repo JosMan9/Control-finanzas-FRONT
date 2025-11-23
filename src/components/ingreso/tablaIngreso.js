@@ -10,6 +10,8 @@ export class TablaIngreso extends LitElement {
     quincenas: { type: Array },
     periodicidades: { type: Array },
     cargando: { type: Boolean },
+    filtroQuincena: { type: String },
+    filtroPeriodicidad: { type: String },
   };
 
   static styles = [tablaIngresoStyles];
@@ -21,6 +23,8 @@ export class TablaIngreso extends LitElement {
     this.quincenas = [];
     this.periodicidades = [];
     this.cargando = false;
+    this.filtroQuincena = '';
+    this.filtroPeriodicidad = '';
   }
 
   get #renderSkeleton() {
@@ -66,7 +70,10 @@ export class TablaIngreso extends LitElement {
           </tr>
         </thead>
         <tbody>
-          ${this.ingresos.map(i => html`
+          ${this.ingresos
+        .filter(i => !this.filtroQuincena || i.quincena?.nombre === this.filtroQuincena)
+        .filter(i => !this.filtroPeriodicidad || i.periodicidad?.nombre === this.filtroPeriodicidad)
+        .map(i => html`
             <tr>
               <td>${i.nombre ?? ''}</td>
               <td>$${i.monto?.toLocaleString('es-MX') ?? '0'}</td>
@@ -90,7 +97,7 @@ export class TablaIngreso extends LitElement {
   #abrirModal(ingreso = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-ingreso');
     if (modal) {
-      if (typeof ingreso.detail === 'number' ) {
+      if (typeof ingreso.detail === 'number') {
         modal.abrir();
       } else {
         modal.abrirParaEditar(ingreso);
@@ -109,6 +116,10 @@ export class TablaIngreso extends LitElement {
 
       this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
         detail: this.ingresos
+      }));
+
+      this.dispatchEvent(new CustomEvent('ingreso-eliminado-id', {
+        detail: id
       }));
     }
   }
@@ -130,6 +141,10 @@ export class TablaIngreso extends LitElement {
     this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
       detail: this.ingresos
     }));
+
+    this.dispatchEvent(new CustomEvent('ingreso-creado', {
+      detail: nuevoIngreso
+    }));
   }
 
   #manejarIngresoEditado(e) {
@@ -147,11 +162,21 @@ export class TablaIngreso extends LitElement {
       this.dispatchEvent(new CustomEvent('ingresos-actualizados', {
         detail: this.ingresos
       }));
+
+      this.dispatchEvent(new CustomEvent('ingreso-actualizado', {
+        detail: ingresoEditado
+      }));
     }
   }
 
   #manejarModalCerrado() {
     // Opcional: manejar cuando se cierra el modal
+  }
+
+  #resetearFiltros() {
+    this.filtroQuincena = '';
+    this.filtroPeriodicidad = '';
+    this.requestUpdate();
   }
 
   get #renderModalIngreso() {
@@ -166,14 +191,69 @@ export class TablaIngreso extends LitElement {
     `;
   }
 
+  get uniqueQuincenas() {
+    const quincenas = new Set();
+    this.ingresos.forEach(i => {
+      if (i.quincena?.nombre) {
+        quincenas.add(i.quincena.nombre);
+      }
+    });
+    return Array.from(quincenas);
+  }
+
+  get uniquePeriodicidades() {
+    const periodicidades = new Set();
+    this.ingresos.forEach(i => {
+      if (i.periodicidad?.nombre) {
+        periodicidades.add(i.periodicidad.nombre);
+      }
+    });
+    return Array.from(periodicidades);
+  }
+
   get #renderHeader() {
     return html`
       <div class="header">
         <h2>${this.titulo}</h2>
-        <div class="header-actions">
-          <button class="btn-agregar" @click="${this.#abrirModal}">
-            + Agregar Ingreso
-          </button>
+        <div class="header-actions" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-agregar" @click="${this.#abrirModal}">
+              + Agregar Ingreso
+            </button>
+            <button 
+              class="btn-reset" 
+              @click="${this.#resetearFiltros}"
+              style="padding: 8px 16px; border-radius: 4px; border: 1px solid #dc3545; background-color: #dc3545; color: white; cursor: pointer; font-weight: 500; transition: background-color 0.2s;"
+              onmouseover="this.style.backgroundColor='#c82333'"
+              onmouseout="this.style.backgroundColor='#dc3545'"
+            >
+              🗑️ Limpiar Filtros
+            </button>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <select 
+              class="form-control" 
+              .value="${this.filtroQuincena}"
+              @change="${e => this.filtroQuincena = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las quincenas</option>
+              ${this.uniqueQuincenas.map(q => html`
+                <option value="${q}">${q}</option>
+              `)}
+            </select>
+            <select 
+              class="form-control" 
+              .value="${this.filtroPeriodicidad}"
+              @change="${e => this.filtroPeriodicidad = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las periodicidades</option>
+              ${this.uniquePeriodicidades.map(p => html`
+                <option value="${p}">${p}</option>
+              `)}
+            </select>
+          </div>
           <slot name="acciones"></slot>
         </div>
       </div>

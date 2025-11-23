@@ -102,6 +102,10 @@ export class TablaTarjeta extends LitElement {
       this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
         detail: this.tarjetas
       }));
+
+      this.dispatchEvent(new CustomEvent('tarjeta-eliminada-id', {
+        detail: id
+      }));
     }
   }
 
@@ -119,8 +123,12 @@ export class TablaTarjeta extends LitElement {
     this.requestUpdate();
     console.log('Tarjeta agregada:', nuevaTarjeta);
 
-    this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
+    this.dispatchEvent(new CustomEvent('tarjetas-creadas', {
       detail: this.tarjetas
+    }));
+
+    this.dispatchEvent(new CustomEvent('tarjeta-creada', {
+      detail: nuevaTarjeta
     }));
   }
 
@@ -138,6 +146,10 @@ export class TablaTarjeta extends LitElement {
 
       this.dispatchEvent(new CustomEvent('tarjetas-actualizadas', {
         detail: this.tarjetas
+      }));
+
+      this.dispatchEvent(new CustomEvent('tarjeta-actualizada', {
+        detail: tarjetaEditada
       }));
     }
   }

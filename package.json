@@ -1,7 +1,6 @@
 {
   "name": "control-gastos-componentes-lit",
-  "version": "1.0.3",
-  "name": "control-finanzas-componentes-lit",
+  "version": "1.0.0",
   "description": "Componentes Lit para el proyecto de control de gastos",
   "type": "module",
   "module": "dist/control-gastos-componentes-lit.es.js",
@@ -11,7 +10,9 @@
       "default": "./dist/control-gastos-componentes-lit.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

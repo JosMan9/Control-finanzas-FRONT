@@ -93,8 +93,10 @@ export class ModalAgregarIngreso extends LitElement {
           <select id="periodicidad" name="periodicidad" required>
             <option value="">Seleccionar periodicidad</option>
             ${this.periodicidades.map(p => {
-              const selected = this.ingresoEditando?.periodicidad?.id === p.id ? 'selected' : '';
-              return html`<option value="${p.id}" ${selected}>${p.nombre}</option>`;
+              if(p.activo) {
+                const selected = this.ingresoEditando?.periodicidad?.id === p.id ? 'selected' : '';
+                return html`<option value="${p.id}" ${selected}>${p.nombre}</option>`;
+              }
             })}
           </select>
         </div>

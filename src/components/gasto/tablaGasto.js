@@ -2,6 +2,11 @@ import { LitElement, html } from 'lit';
 import { tablaGastoStyles } from './tablaGasto.styles.js';
 import './modals/modalAgregarGasto.js';
 
+const MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
 
 export class TablaGasto extends LitElement {
   static properties = {
@@ -9,8 +14,13 @@ export class TablaGasto extends LitElement {
     gastos: { type: Array },
     ingresos: { type: Array },
     tipoGastos: { type: Array },
-    quincenas: { type: Array },
     cargando: { type: Boolean },
+    filtroTipoGasto: { type: String },
+    filtroQuincena: { type: String },
+    filtroEstado: { type: String },
+    filtroIngreso: { type: String },
+    filtroMes: { type: String },
+    filtroAño: { type: String },
   };
 
   static styles = [tablaGastoStyles];
@@ -21,8 +31,13 @@ export class TablaGasto extends LitElement {
     this.gastos = [];
     this.ingresos = [];
     this.tipoGastos = [];
-    this.quincenas = [];
     this.cargando = false;
+    this.filtroTipoGasto = '';
+    this.filtroQuincena = '';
+    this.filtroEstado = '';
+    this.filtroIngreso = '';
+    this.filtroMes = '';
+    this.filtroAño = '';
   }
 
   get #renderSkeleton() {
@@ -65,6 +80,7 @@ export class TablaGasto extends LitElement {
         <thead>
           <tr>
             <th>Concepto</th>
+            <th>Monto</th>
             <th>Fecha</th>
             <th>Ingreso</th>
             <th>Tipo de Gasto</th>
@@ -74,13 +90,23 @@ export class TablaGasto extends LitElement {
           </tr>
         </thead>
         <tbody>
-          ${this.gastos.map(g => html`
+          ${this.gastos
+        .filter(g =>
+          (!this.filtroTipoGasto || g.tipoGasto?.id == this.filtroTipoGasto) &&
+          (!this.filtroQuincena || g.ingreso?.quincena?.nombre === this.filtroQuincena) &&
+          (!this.filtroEstado || (this.filtroEstado === 'cubierto' ? g.esCubierto : !g.esCubierto)) &&
+          (!this.filtroIngreso || g.ingreso?.nombre === this.filtroIngreso) &&
+          (!this.filtroMes || this.#obtenerNombreMes(g.fechaOperacion) === this.filtroMes) &&
+          (!this.filtroAño || (g.fechaOperacion && new Date(g.fechaOperacion).getFullYear().toString() === this.filtroAño))
+        )
+        .map(g => html`
             <tr>
               <td>${g.concepto ?? ''}</td>
-              <td>${g.fecha ?? 'N/A'}</td>
+              <td>$${this.formatMonto(g.monto)}</td>
+              <td>${this.convertidorFecha(g.fechaOperacion) ?? 'N/A'}</td>
               <td>${g.ingreso?.nombre ?? 'N/A'}</td>
               <td>${g.tipoGasto?.nombre ?? 'N/A'}</td>
-              <td>${g.quincena?.nombre ?? 'N/A'}</td>
+              <td>${g.ingreso.quincena?.nombre ?? 'N/A'}</td>
               <td>
                 <span class="badge ${g.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
                   ${g.esCubierto ? 'Cubierto' : 'No Cubierto'}
@@ -104,7 +130,7 @@ export class TablaGasto extends LitElement {
   #abrirModal(gasto = null) {
     const modal = this.shadowRoot.querySelector('modal-agregar-gasto');
     if (modal) {
-      if (typeof gasto === 'number' || !gasto) {
+      if (typeof gasto.detail === 'number' || !gasto) {
         modal.abrir();
       } else {
         modal.abrirParaEditar(gasto);
@@ -123,6 +149,10 @@ export class TablaGasto extends LitElement {
 
       this.dispatchEvent(new CustomEvent('gastos-actualizados', {
         detail: this.gastos
+      }));
+
+      this.dispatchEvent(new CustomEvent('gasto-eliminado-id', {
+        detail: id
       }));
     }
   }
@@ -144,6 +174,10 @@ export class TablaGasto extends LitElement {
     this.dispatchEvent(new CustomEvent('gastos-actualizados', {
       detail: this.gastos
     }));
+
+    this.dispatchEvent(new CustomEvent('gasto-agregado', {
+      detail: nuevoGasto
+    }));
   }
 
   #manejarGastoEditado(e) {
@@ -161,6 +195,10 @@ export class TablaGasto extends LitElement {
       this.dispatchEvent(new CustomEvent('gastos-actualizados', {
         detail: this.gastos
       }));
+
+      this.dispatchEvent(new CustomEvent('gasto-actualizado', {
+        detail: gastoEditado
+      }));
     }
   }
 
@@ -168,12 +206,21 @@ export class TablaGasto extends LitElement {
     // Opcional: manejar cuando se cierra el modal
   }
 
+  #resetearFiltros() {
+    this.filtroTipoGasto = '';
+    this.filtroQuincena = '';
+    this.filtroEstado = '';
+    this.filtroIngreso = '';
+    this.filtroMes = '';
+    this.filtroAño = '';
+    this.requestUpdate();
+  }
+
   get #renderModalGasto() {
     return html`
       <modal-agregar-gasto
         .ingresos="${this.ingresos}"
         .tipoGastos="${this.tipoGastos}"
-        .quincenas="${this.quincenas}"
         @gasto-agregado="${this.#manejarGastoAgregado}"
         @gasto-editado="${this.#manejarGastoEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">
@@ -185,16 +232,146 @@ export class TablaGasto extends LitElement {
     return html`
       <div class="header">
         <h2>${this.titulo}</h2>
-        <div class="header-actions">
-          <button class="btn-agregar" @click="${this.#abrirModal}">
-            + Agregar Gasto
-          </button>
+        <div class="header-actions" style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-agregar" @click="${this.#abrirModal}">
+              + Agregar Gasto
+            </button>
+            <button 
+              class="btn-reset" 
+              @click="${this.#resetearFiltros}"
+              style="padding: 8px 16px; border-radius: 4px; border: 1px solid #dc3545; background-color: #dc3545; color: white; cursor: pointer; font-weight: 500; transition: background-color 0.2s;"
+              onmouseover="this.style.backgroundColor='#c82333'"
+              onmouseout="this.style.backgroundColor='#dc3545'"
+            >
+              🗑️ Limpiar Filtros
+            </button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <select 
+              class="form-control" 
+              .value="${this.filtroTipoGasto}"
+              @change="${e => this.filtroTipoGasto = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los tipos</option>
+              ${this.tipoGastos.map(t => html`
+                <option value="${t.id}">${t.nombre}</option>
+              `)}
+            </select>
+
+            <select 
+              class="form-control" 
+              .value="${this.filtroQuincena}"
+              @change="${e => this.filtroQuincena = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las quincenas</option>
+              ${this.uniqueQuincenas.map(q => html`
+                <option value="${q}">${q}</option>
+              `)}
+            </select>
+
+            <select 
+              class="form-control" 
+              .value="${this.filtroEstado}"
+              @change="${e => this.filtroEstado = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los estados</option>
+              <option value="cubierto">Cubierto</option>
+              <option value="no_cubierto">No Cubierto</option>
+            </select>
+
+            <select 
+              class="form-control" 
+              .value="${this.filtroIngreso}"
+              @change="${e => this.filtroIngreso = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los ingresos</option>
+              ${this.uniqueIngresos.map(i => html`
+                <option value="${i}">${i}</option>
+              `)}
+            </select>
+
+            <select 
+              .value="${this.filtroAño}"
+              @change="${e => this.filtroAño = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todos los años</option>
+              ${this.uniqueAños.map(a => html`
+                <option value="${a}">${a}</option>
+              `)}
+            </select>
+          </div>
           <slot name="acciones"></slot>
         </div>
       </div>
     `;
   }
 
+  get uniqueQuincenas() {
+    const quincenas = new Set();
+    this.gastos.forEach(g => {
+      if (g.ingreso?.quincena?.nombre) {
+        quincenas.add(g.ingreso.quincena.nombre);
+      }
+    });
+    return Array.from(quincenas).sort();
+  }
+
+  get uniqueIngresos() {
+    const ingresos = new Set();
+    this.gastos.forEach(g => {
+      if (g.ingreso?.nombre) {
+        ingresos.add(g.ingreso.nombre);
+      }
+    });
+    return Array.from(ingresos).sort();
+  }
+
+  get uniqueMeses() {
+    const meses = new Set();
+    this.gastos.forEach(g => {
+      const nombreMes = this.#obtenerNombreMes(g.fechaOperacion);
+      if (nombreMes) {
+        meses.add(nombreMes);
+      }
+    });
+    return Array.from(meses).sort((a, b) => MESES.indexOf(a) - MESES.indexOf(b));
+  }
+
+  get uniqueAños() {
+    const años = new Set();
+    this.gastos.forEach(g => {
+      if (g.fechaOperacion) {
+        const fecha = new Date(g.fechaOperacion);
+        años.add(fecha.getFullYear().toString());
+      }
+    });
+    return Array.from(años).sort();
+  }
+
+  #obtenerNombreMes(fechaString) {
+    if (!fechaString) return null;
+    const date = new Date(fechaString);
+    return MESES[date.getUTCMonth()];
+  }
+
+  formatMonto(monto) {
+    return monto ? Number(monto).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+  }
+
+  convertidorFecha(fechaString) {
+    const date = new Date(fechaString);
+    const y = date.getUTCFullYear();
+    const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${d}/${m}/${y}`;
+  }
 
   render() {
     return html`
@@ -209,4 +386,3 @@ export class TablaGasto extends LitElement {
 }
 
 customElements.define('tabla-gasto', TablaGasto);
-

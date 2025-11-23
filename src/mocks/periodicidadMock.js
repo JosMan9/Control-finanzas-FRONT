@@ -9,7 +9,7 @@ export const periodicidadMock = [
         id: 2,
         nombre: 'Semanal',
         dias: 7,
-        activo: true
+        activo: false
     },
     {
         id: 3,
