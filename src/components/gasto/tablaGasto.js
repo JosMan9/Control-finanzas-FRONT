@@ -14,6 +14,7 @@ export class TablaGasto extends LitElement {
     gastos: { type: Array },
     ingresos: { type: Array },
     tipoGastos: { type: Array },
+    personas: { type: Array },
     cargando: { type: Boolean },
     filtroTipoGasto: { type: String },
     filtroQuincena: { type: String },
@@ -21,6 +22,7 @@ export class TablaGasto extends LitElement {
     filtroIngreso: { type: String },
     filtroMes: { type: String },
     filtroAño: { type: String },
+    filtroPersona: { type: String },
   };
 
   static styles = [tablaGastoStyles];
@@ -31,6 +33,7 @@ export class TablaGasto extends LitElement {
     this.gastos = [];
     this.ingresos = [];
     this.tipoGastos = [];
+    this.personas = [];
     this.cargando = false;
     this.filtroTipoGasto = '';
     this.filtroQuincena = '';
@@ -38,6 +41,7 @@ export class TablaGasto extends LitElement {
     this.filtroIngreso = '';
     this.filtroMes = '';
     this.filtroAño = '';
+    this.filtroPersona = '';
   }
 
   get #renderSkeleton() {
@@ -51,12 +55,16 @@ export class TablaGasto extends LitElement {
             <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:100px;"></span></th>
+            <th><span class="skeleton" style="display:inline-block;width:100px;"></span></th>
+            <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
           </tr>
         </thead>
         <tbody>
           ${Array.from({ length: 4 }).map(() => html`
             <tr>
+              <td><div class="skeleton" style="width:100%;"></div></td>
+              <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
@@ -85,6 +93,7 @@ export class TablaGasto extends LitElement {
             <th>Ingreso</th>
             <th>Tipo de Gasto</th>
             <th>Quincena</th>
+            <th>Persona</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -97,7 +106,8 @@ export class TablaGasto extends LitElement {
           (!this.filtroEstado || (this.filtroEstado === 'cubierto' ? g.esCubierto : !g.esCubierto)) &&
           (!this.filtroIngreso || g.ingreso?.nombre === this.filtroIngreso) &&
           (!this.filtroMes || this.#obtenerNombreMes(g.fechaOperacion) === this.filtroMes) &&
-          (!this.filtroAño || (g.fechaOperacion && new Date(g.fechaOperacion).getFullYear().toString() === this.filtroAño))
+          (!this.filtroAño || (g.fechaOperacion && new Date(g.fechaOperacion).getFullYear().toString() === this.filtroAño)) &&
+          (!this.filtroPersona || g.persona?.id == this.filtroPersona)
         )
         .map(g => html`
             <tr>
@@ -107,6 +117,7 @@ export class TablaGasto extends LitElement {
               <td>${g.ingreso?.nombre ?? 'N/A'}</td>
               <td>${g.tipoGasto?.nombre ?? 'N/A'}</td>
               <td>${g.ingreso.quincena?.nombre ?? 'N/A'}</td>
+              <td>${g.persona?.alias || g.persona?.nombre || 'N/A'}</td>
               <td>
                 <span class="badge ${g.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
                   ${g.esCubierto ? 'Cubierto' : 'No Cubierto'}
@@ -213,6 +224,7 @@ export class TablaGasto extends LitElement {
     this.filtroIngreso = '';
     this.filtroMes = '';
     this.filtroAño = '';
+    this.filtroPersona = '';
     this.requestUpdate();
   }
 
@@ -221,6 +233,7 @@ export class TablaGasto extends LitElement {
       <modal-agregar-gasto
         .ingresos="${this.ingresos}"
         .tipoGastos="${this.tipoGastos}"
+        .personas="${this.personas}"
         @gasto-agregado="${this.#manejarGastoAgregado}"
         @gasto-editado="${this.#manejarGastoEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">
@@ -303,6 +316,17 @@ export class TablaGasto extends LitElement {
               <option value="">Todos los años</option>
               ${this.uniqueAños.map(a => html`
                 <option value="${a}">${a}</option>
+              `)}
+            </select>
+
+            <select 
+              .value="${this.filtroPersona}"
+              @change="${e => this.filtroPersona = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las personas</option>
+              ${this.personas.map(p => html`
+                <option value="${p.id}">${p.alias || p.nombre}</option>
               `)}
             </select>
           </div>

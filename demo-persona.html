@@ -3,26 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Demo Persona</title>
+    <title>Demo - Tabla Persona</title>
     <style>
       body {
         font-family:
           system-ui,
           -apple-system,
           sans-serif;
-        padding: 20px;
-        background: #f9fafb;
-      }
-      .container {
         max-width: 1200px;
         margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      h1 {
+        color: #111827;
+        margin-bottom: 20px;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 14px;
+      }
+      .back-link:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
+    <a href="index.html" class="back-link">← Volver al índice</a>
     <div class="container">
-      <h1>Demo - Tabla Persona</h1>
-      <tabla-persona id="tablaPersona"></tabla-persona>
+      <h1>Demo: Tabla de Personas</h1>
+      <div id="demo"></div>
     </div>
     <script type="module" src="./demo/demo-persona.js"></script>
   </body>

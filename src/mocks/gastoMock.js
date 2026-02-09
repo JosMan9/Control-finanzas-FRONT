@@ -1,5 +1,6 @@
 import { ingresoMock } from './ingresoMock.js';
 import { tipoGastoMock } from './tipoGastoMock.js';
+import { personaMock } from './personaMock.js';
 
 export const gastoMock = [
     {
@@ -10,6 +11,7 @@ export const gastoMock = [
         esCubierto: true,
         ingreso: ingresoMock[0],
         tipoGasto: tipoGastoMock[2],
+        persona: personaMock[0],
     },
     {
         id: 2,
@@ -19,6 +21,7 @@ export const gastoMock = [
         esCubierto: false,
         ingreso: ingresoMock[1],
         tipoGasto: tipoGastoMock[1],
+        persona: personaMock[1],
     },
     {
         id: 3,
@@ -28,6 +31,7 @@ export const gastoMock = [
         esCubierto: true,
         ingreso: ingresoMock[0],
         tipoGasto: tipoGastoMock[2],
+        persona: personaMock[0],
     }
 ];
 
