@@ -131,6 +131,10 @@ tbody tr:hover {
   background-color: #fee2e2;
   color: #991b1b;
 }
+.badge-persona {
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
 
 
 `;

@@ -42,6 +42,33 @@ export class TablaGasto extends LitElement {
     this.filtroMes = '';
     this.filtroAño = '';
     this.filtroPersona = '';
+
+    // Paleta de colores bien diferenciados
+    const baseColorPalette = [
+      { bg: '#DBEAFE', text: '#1E40AF' }, // Azul
+      { bg: '#FCE7F3', text: '#9F1239' }, // Rosa
+      { bg: '#D1FAE5', text: '#065F46' }, // Verde
+      { bg: '#FEF3C7', text: '#92400E' }, // Amarillo
+      { bg: '#E0E7FF', text: '#3730A3' }, // Índigo
+      { bg: '#FECACA', text: '#991B1B' }, // Rojo
+      { bg: '#D1D5DB', text: '#1F2937' }, // Gris
+      { bg: '#DDD6FE', text: '#5B21B6' }, // Púrpura
+      { bg: '#FED7AA', text: '#9A3412' }, // Naranja
+      { bg: '#A7F3D0', text: '#064E3B' }, // Esmeralda
+      { bg: '#BAE6FD', text: '#075985' }, // Cielo
+      { bg: '#FBCFE8', text: '#831843' }, // Fucsia
+      { bg: '#FDE68A', text: '#78350F' }, // Ámbar
+      { bg: '#C7D2FE', text: '#4338CA' }, // Violeta
+      { bg: '#FCA5A5', text: '#7F1D1D' }, // Rosa rojizo
+    ];
+
+    // Mezclar aleatoriamente la paleta usando Fisher-Yates shuffle
+    this.shuffledColorPalette = [...baseColorPalette];
+    for (let i = this.shuffledColorPalette.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.shuffledColorPalette[i], this.shuffledColorPalette[j]] =
+        [this.shuffledColorPalette[j], this.shuffledColorPalette[i]];
+    }
   }
 
   get #renderSkeleton() {
@@ -117,7 +144,14 @@ export class TablaGasto extends LitElement {
               <td>${g.ingreso?.nombre ?? 'N/A'}</td>
               <td>${g.tipoGasto?.nombre ?? 'N/A'}</td>
               <td>${g.ingreso.quincena?.nombre ?? 'N/A'}</td>
-              <td>${g.persona?.alias || g.persona?.nombre || 'N/A'}</td>
+              <td>
+                ${g.persona ? html`
+                  <span class="badge badge-persona" 
+                        style="background-color: ${this.getPersonaColor(g.persona.id).bg}; color: ${this.getPersonaColor(g.persona.id).text};">
+                    ${g.persona.alias || g.persona.nombre}
+                  </span>
+                ` : 'N/A'}
+              </td>
               <td>
                 <span class="badge ${g.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
                   ${g.esCubierto ? 'Cubierto' : 'No Cubierto'}
@@ -395,6 +429,33 @@ export class TablaGasto extends LitElement {
     const d = String(date.getUTCDate()).padStart(2, "0");
 
     return `${d}/${m}/${y}`;
+  }
+
+  getPersonaColor(personaId) {
+    if (!personaId) return { bg: '#e5e7eb', text: '#374151' };
+
+    // Paleta de colores bien diferenciados
+    const colorPalette = [
+      { bg: '#DBEAFE', text: '#1E40AF' }, // Azul
+      { bg: '#FCE7F3', text: '#9F1239' }, // Rosa
+      { bg: '#D1FAE5', text: '#065F46' }, // Verde
+      { bg: '#FEF3C7', text: '#92400E' }, // Amarillo
+      { bg: '#E0E7FF', text: '#3730A3' }, // Índigo
+      { bg: '#FECACA', text: '#991B1B' }, // Rojo
+      { bg: '#D1D5DB', text: '#1F2937' }, // Gris
+      { bg: '#DDD6FE', text: '#5B21B6' }, // Púrpura
+      { bg: '#FED7AA', text: '#9A3412' }, // Naranja
+      { bg: '#A7F3D0', text: '#064E3B' }, // Esmeralda
+      { bg: '#BAE6FD', text: '#075985' }, // Cielo
+      { bg: '#FBCFE8', text: '#831843' }, // Fucsia
+      { bg: '#FDE68A', text: '#78350F' }, // Ámbar
+      { bg: '#C7D2FE', text: '#4338CA' }, // Violeta
+      { bg: '#FCA5A5', text: '#7F1D1D' }, // Rosa rojizo
+    ];
+
+    // Usar el ID para seleccionar un color de la paleta
+    const index = personaId % colorPalette.length;
+    return colorPalette[index];
   }
 
   render() {

@@ -47,6 +47,10 @@ export class TablaGastoTarjeta extends LitElement {
     return `${d}/${m}/${y}`;
   }
 
+  formatMonto(monto) {
+    return monto ? Number(monto).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
+  }
+
   get #renderSkeleton() {
     return html`
       <table>
@@ -135,8 +139,8 @@ export class TablaGastoTarjeta extends LitElement {
                   ${gt.esMio ? 'Sí' : 'No'}
                 </span>
               </td>
-              <td>$${gt.cantidadAbonada?.toLocaleString('es-MX') ?? '0'}</td>
-              <td>$${gt.gasto?.monto?.toFixed(2) ?? '0.00'}</td>
+              <td>$${this.formatMonto(gt.cantidadAbonada)}</td>
+              <td>$${this.formatMonto(gt.gasto?.monto)}</td>
               <td>${this.convertidorFecha(gt.gasto?.fechaOperacion)}</td>
               <td>
                 <span class="badge ${gt.gasto?.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
