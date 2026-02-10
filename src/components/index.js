@@ -5,3 +5,5 @@ import './periodicidad/tablaPeriodicidad.js';
 import './gasto/tablaGasto.js';
 import './gastoTarjeta/tablaGastoTarjeta.js';
 import './ingreso/tablaIngreso.js';
+import './persona/tablaPersona.js';
+
