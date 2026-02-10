@@ -76,7 +76,7 @@ export class TablaIngreso extends LitElement {
         .map(i => html`
             <tr>
               <td>${i.nombre ?? ''}</td>
-              <td>$${i.monto?.toLocaleString('es-MX') ?? '0'}</td>
+              <td>$${this.formatMonto(i.monto)}</td>
               <td>${i.quincena?.nombre ?? 'N/A'}</td>
               <td>${i.periodicidad?.nombre ?? 'N/A'}</td>
               <td class="acciones">
@@ -92,6 +92,10 @@ export class TablaIngreso extends LitElement {
         </tbody>
       </table>
     `;
+  }
+
+  formatMonto(monto) {
+    return monto ? Number(monto).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
   }
 
   #abrirModal(ingreso = null) {

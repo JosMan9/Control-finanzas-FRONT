@@ -1,6 +1,6 @@
 import { css } from 'lit';
 
-export const tablaGastoStyles = css`
+export const tablaPersonaStyles = css`
     :host {
   display: block;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
@@ -116,26 +116,5 @@ tbody tr:hover {
   0% { background-position: 100% 0; }
   100% { background-position: 0 0; }
 }
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-.badge-cubierto {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-.badge-no-cubierto {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-.badge-persona {
-  font-weight: 600;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
 
 `;
-

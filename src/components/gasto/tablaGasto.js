@@ -14,6 +14,7 @@ export class TablaGasto extends LitElement {
     gastos: { type: Array },
     ingresos: { type: Array },
     tipoGastos: { type: Array },
+    personas: { type: Array },
     cargando: { type: Boolean },
     filtroTipoGasto: { type: String },
     filtroQuincena: { type: String },
@@ -21,6 +22,7 @@ export class TablaGasto extends LitElement {
     filtroIngreso: { type: String },
     filtroMes: { type: String },
     filtroAño: { type: String },
+    filtroPersona: { type: String },
   };
 
   static styles = [tablaGastoStyles];
@@ -31,6 +33,7 @@ export class TablaGasto extends LitElement {
     this.gastos = [];
     this.ingresos = [];
     this.tipoGastos = [];
+    this.personas = [];
     this.cargando = false;
     this.filtroTipoGasto = '';
     this.filtroQuincena = '';
@@ -38,6 +41,34 @@ export class TablaGasto extends LitElement {
     this.filtroIngreso = '';
     this.filtroMes = '';
     this.filtroAño = '';
+    this.filtroPersona = '';
+
+    // Paleta de colores bien diferenciados
+    const baseColorPalette = [
+      { bg: '#DBEAFE', text: '#1E40AF' }, // Azul
+      { bg: '#FCE7F3', text: '#9F1239' }, // Rosa
+      { bg: '#D1FAE5', text: '#065F46' }, // Verde
+      { bg: '#FEF3C7', text: '#92400E' }, // Amarillo
+      { bg: '#E0E7FF', text: '#3730A3' }, // Índigo
+      { bg: '#FECACA', text: '#991B1B' }, // Rojo
+      { bg: '#D1D5DB', text: '#1F2937' }, // Gris
+      { bg: '#DDD6FE', text: '#5B21B6' }, // Púrpura
+      { bg: '#FED7AA', text: '#9A3412' }, // Naranja
+      { bg: '#A7F3D0', text: '#064E3B' }, // Esmeralda
+      { bg: '#BAE6FD', text: '#075985' }, // Cielo
+      { bg: '#FBCFE8', text: '#831843' }, // Fucsia
+      { bg: '#FDE68A', text: '#78350F' }, // Ámbar
+      { bg: '#C7D2FE', text: '#4338CA' }, // Violeta
+      { bg: '#FCA5A5', text: '#7F1D1D' }, // Rosa rojizo
+    ];
+
+    // Mezclar aleatoriamente la paleta usando Fisher-Yates shuffle
+    this.shuffledColorPalette = [...baseColorPalette];
+    for (let i = this.shuffledColorPalette.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.shuffledColorPalette[i], this.shuffledColorPalette[j]] =
+        [this.shuffledColorPalette[j], this.shuffledColorPalette[i]];
+    }
   }
 
   get #renderSkeleton() {
@@ -51,12 +82,16 @@ export class TablaGasto extends LitElement {
             <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:120px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:100px;"></span></th>
+            <th><span class="skeleton" style="display:inline-block;width:100px;"></span></th>
+            <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
             <th><span class="skeleton" style="display:inline-block;width:80px;"></span></th>
           </tr>
         </thead>
         <tbody>
           ${Array.from({ length: 4 }).map(() => html`
             <tr>
+              <td><div class="skeleton" style="width:100%;"></div></td>
+              <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
               <td><div class="skeleton" style="width:100%;"></div></td>
@@ -85,6 +120,7 @@ export class TablaGasto extends LitElement {
             <th>Ingreso</th>
             <th>Tipo de Gasto</th>
             <th>Quincena</th>
+            <th>Persona</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -97,7 +133,8 @@ export class TablaGasto extends LitElement {
           (!this.filtroEstado || (this.filtroEstado === 'cubierto' ? g.esCubierto : !g.esCubierto)) &&
           (!this.filtroIngreso || g.ingreso?.nombre === this.filtroIngreso) &&
           (!this.filtroMes || this.#obtenerNombreMes(g.fechaOperacion) === this.filtroMes) &&
-          (!this.filtroAño || (g.fechaOperacion && new Date(g.fechaOperacion).getFullYear().toString() === this.filtroAño))
+          (!this.filtroAño || (g.fechaOperacion && new Date(g.fechaOperacion).getFullYear().toString() === this.filtroAño)) &&
+          (!this.filtroPersona || g.persona?.id == this.filtroPersona)
         )
         .map(g => html`
             <tr>
@@ -107,6 +144,14 @@ export class TablaGasto extends LitElement {
               <td>${g.ingreso?.nombre ?? 'N/A'}</td>
               <td>${g.tipoGasto?.nombre ?? 'N/A'}</td>
               <td>${g.ingreso.quincena?.nombre ?? 'N/A'}</td>
+              <td>
+                ${g.persona ? html`
+                  <span class="badge badge-persona" 
+                        style="background-color: ${this.getPersonaColor(g.persona.id).bg}; color: ${this.getPersonaColor(g.persona.id).text};">
+                    ${g.persona.alias || g.persona.nombre}
+                  </span>
+                ` : 'N/A'}
+              </td>
               <td>
                 <span class="badge ${g.esCubierto ? 'badge-cubierto' : 'badge-no-cubierto'}">
                   ${g.esCubierto ? 'Cubierto' : 'No Cubierto'}
@@ -213,6 +258,7 @@ export class TablaGasto extends LitElement {
     this.filtroIngreso = '';
     this.filtroMes = '';
     this.filtroAño = '';
+    this.filtroPersona = '';
     this.requestUpdate();
   }
 
@@ -221,6 +267,7 @@ export class TablaGasto extends LitElement {
       <modal-agregar-gasto
         .ingresos="${this.ingresos}"
         .tipoGastos="${this.tipoGastos}"
+        .personas="${this.personas}"
         @gasto-agregado="${this.#manejarGastoAgregado}"
         @gasto-editado="${this.#manejarGastoEditado}"
         @modal-cerrado="${this.#manejarModalCerrado}">
@@ -305,6 +352,17 @@ export class TablaGasto extends LitElement {
                 <option value="${a}">${a}</option>
               `)}
             </select>
+
+            <select 
+              .value="${this.filtroPersona}"
+              @change="${e => this.filtroPersona = e.target.value}"
+              style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;"
+            >
+              <option value="">Todas las personas</option>
+              ${this.personas.map(p => html`
+                <option value="${p.id}">${p.alias || p.nombre}</option>
+              `)}
+            </select>
           </div>
           <slot name="acciones"></slot>
         </div>
@@ -371,6 +429,33 @@ export class TablaGasto extends LitElement {
     const d = String(date.getUTCDate()).padStart(2, "0");
 
     return `${d}/${m}/${y}`;
+  }
+
+  getPersonaColor(personaId) {
+    if (!personaId) return { bg: '#e5e7eb', text: '#374151' };
+
+    // Paleta de colores bien diferenciados
+    const colorPalette = [
+      { bg: '#DBEAFE', text: '#1E40AF' }, // Azul
+      { bg: '#FCE7F3', text: '#9F1239' }, // Rosa
+      { bg: '#D1FAE5', text: '#065F46' }, // Verde
+      { bg: '#FEF3C7', text: '#92400E' }, // Amarillo
+      { bg: '#E0E7FF', text: '#3730A3' }, // Índigo
+      { bg: '#FECACA', text: '#991B1B' }, // Rojo
+      { bg: '#D1D5DB', text: '#1F2937' }, // Gris
+      { bg: '#DDD6FE', text: '#5B21B6' }, // Púrpura
+      { bg: '#FED7AA', text: '#9A3412' }, // Naranja
+      { bg: '#A7F3D0', text: '#064E3B' }, // Esmeralda
+      { bg: '#BAE6FD', text: '#075985' }, // Cielo
+      { bg: '#FBCFE8', text: '#831843' }, // Fucsia
+      { bg: '#FDE68A', text: '#78350F' }, // Ámbar
+      { bg: '#C7D2FE', text: '#4338CA' }, // Violeta
+      { bg: '#FCA5A5', text: '#7F1D1D' }, // Rosa rojizo
+    ];
+
+    // Usar el ID para seleccionar un color de la paleta
+    const index = personaId % colorPalette.length;
+    return colorPalette[index];
   }
 
   render() {
