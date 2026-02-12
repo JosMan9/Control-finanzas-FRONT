@@ -1,0 +1,63 @@
+name: Reelase and Publish to NPM
+
+on:
+  pull_request:
+    branches:
+      -  main
+    types: [closed]
+
+jobs:
+  release:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests:  write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          npm install
+          
+      - name: Determine version bump
+        id: version
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "Branch name: $BRANCH_NAME"
+
+          if[[ "$BRANCH_NAME" == feature/* ]]; then
+            echo "BUMP=minor" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH_NAME" == fix/* ]]; then
+            echo "BUMP=path" >> $GITHUB_OUTPUT
+          elif [[ "BRANCH_NAME" == major/* ]] || [[ "$BRANCH_NAME" == breaking/* ]]; then
+            echo "BUMP=major" >> $GITHUB_OUTPUT
+          else
+            echo "No valid branch prefix found. Defaulting to patch."
+            echo "BUMP=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump version
+        run: |
+          git config user.name "${{ secrets.GIT_USERNAME }}"
+          git config user.email "${{ secrets.GIT_EMAIL }}"
+          npm version ${{ steps.version.outputs.BUMP }}
+      
+      - name: Push version commit and tag
+        run: |
+          git push origin main --follow-tags
+
+      - name: Publish to NPM
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PASSWORD }}
+        
+        
+      
