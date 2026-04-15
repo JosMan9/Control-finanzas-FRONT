@@ -101,6 +101,51 @@ export const modalTipoGastoStyles = css`
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .icon-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #f9fafb;
+    color: #6b7280;
+  }
+
+  .icon-option:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+
+  .icon-option.active {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  .icon-option svg {
+    margin-bottom: 4px;
+  }
+
+  .icon-option span {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
   .campo input::placeholder {
     color: #9ca3af;
   }

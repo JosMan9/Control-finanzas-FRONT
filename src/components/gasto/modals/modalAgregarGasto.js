@@ -1,4 +1,5 @@
 import { LitElement, html, nothing } from "lit";
+import { live } from 'lit/directives/live.js';
 import { modalStyles } from "./modalAgregarGasto.styles.js";
 
 export class ModalAgregarGasto extends LitElement {
@@ -9,6 +10,7 @@ export class ModalAgregarGasto extends LitElement {
     gastoEditando: { type: Object },
     ingresos: { type: Array },
     tipoGastos: { type: Array },
+    personas: { type: Array },
   };
 
   static styles = [modalStyles];
@@ -21,6 +23,7 @@ export class ModalAgregarGasto extends LitElement {
     this.gastoEditando = null;
     this.ingresos = [];
     this.tipoGastos = [];
+    this.personas = [];
   }
 
   get #renderHeader() {
@@ -50,8 +53,17 @@ export class ModalAgregarGasto extends LitElement {
 
   get #renderForm() {
     // Formatear fecha para el input date (YYYY-MM-DD)
-    const fechaValue = this.gastoEditando?.fechaOperacion || '';
+    const fechaValue = this.gastoEditando?.fechaOperacion 
+      ? this.gastoEditando.fechaOperacion.split('T')[0] 
+      : '';
     
+    // Buscar ID de persona por nombre si no tiene ID (para mock data)
+    let personaId = this.gastoEditando?.persona?.id;
+    if (!personaId && this.gastoEditando?.persona?.nombre) {
+      const pFound = this.personas.find(p => p.nombre === this.gastoEditando.persona.nombre);
+      if (pFound) personaId = pFound.id;
+    }
+
     return html`
       <form @submit="${this.#enviarFormulario}" class="modal-body">
         <div class="campo">
@@ -62,7 +74,7 @@ export class ModalAgregarGasto extends LitElement {
             name="concepto"
             required
             placeholder="Ej: Compra de supermercado"
-            .value="${this.gastoEditando?.concepto || ''}"
+            .value="${live(this.gastoEditando?.concepto || '')}"
           />
         </div>
 
@@ -75,7 +87,7 @@ export class ModalAgregarGasto extends LitElement {
             required
             step="0.01"
             placeholder="Ej: 1500.00"
-            .value="${this.gastoEditando?.monto || ''}"
+            .value="${live(this.gastoEditando?.monto || '')}"
           />
         </div>
 
@@ -86,7 +98,7 @@ export class ModalAgregarGasto extends LitElement {
             id="fecha"
             name="fecha"
             required
-            .value="${fechaValue}"
+            .value="${live(fechaValue)}"
           />
         </div>
 
@@ -94,10 +106,11 @@ export class ModalAgregarGasto extends LitElement {
           <label for="ingreso">Ingreso:</label>
           <select id="ingreso" name="ingreso" required>
             <option value="">Seleccionar ingreso</option>
-            ${this.ingresos.map(i => {
-              const selected = this.gastoEditando?.ingreso?.id === i.id ? 'selected' : '';
-              return html`<option value="${i.id}" ${selected}>${i.nombre}</option>`;
-            })}
+            ${this.ingresos.map(i => html`
+              <option value="${i.id}" ?selected="${this.gastoEditando?.ingreso?.id === i.id}">
+                ${i.nombre}
+              </option>
+            `)}
           </select>
         </div>
 
@@ -105,10 +118,23 @@ export class ModalAgregarGasto extends LitElement {
           <label for="tipoGasto">Tipo de Gasto:</label>
           <select id="tipoGasto" name="tipoGasto" required>
             <option value="">Seleccionar tipo de gasto</option>
-            ${this.tipoGastos.map(tg => {
-              const selected = this.gastoEditando?.tipoGasto?.id === tg.id ? 'selected' : '';
-              return html`<option value="${tg.id}" ${selected}>${tg.nombre}</option>`;
-            })}
+            ${this.tipoGastos.map(tg => html`
+              <option value="${tg.id}" ?selected="${this.gastoEditando?.tipoGasto?.id === tg.id}">
+                ${tg.nombre}
+              </option>
+            `)}
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="persona">Persona:</label>
+          <select id="persona" name="persona">
+            <option value="">Seleccionar persona</option>
+            ${(this.personas || []).map(p => html`
+              <option value="${p.id}" ?selected="${personaId === p.id}">
+                ${p.nombre}
+              </option>
+            `)}
           </select>
         </div>
 
@@ -150,10 +176,12 @@ export class ModalAgregarGasto extends LitElement {
     const formData = new FormData(e.target);
     const ingresoId = parseInt(formData.get("ingreso"));
     const tipoGastoId = parseInt(formData.get("tipoGasto"));
+    const personaId = parseInt(formData.get("persona"));
     const esCubierto = formData.get("esCubierto") === 'on';
     
     const ingresoSeleccionado = this.ingresos.find(i => i.id === ingresoId);
     const tipoGastoSeleccionado = this.tipoGastos.find(tg => tg.id === tipoGastoId);
+    const personaSeleccionada = this.personas.find(p => p.id === personaId);
 
     const gasto = {
       id: this.modoEdicion ? this.gastoEditando.id : Date.now(),
@@ -163,6 +191,7 @@ export class ModalAgregarGasto extends LitElement {
       esCubierto: esCubierto,
       ingreso: ingresoSeleccionado,
       tipoGasto: tipoGastoSeleccionado,
+      persona: personaSeleccionada,
     };
 
     // Emitir evento según el modo
@@ -202,8 +231,9 @@ export class ModalAgregarGasto extends LitElement {
   // Método público para abrir el modal en modo edición
   abrirParaEditar(gasto) {
     this.modoEdicion = true;
-    this.gastoEditando = { ...gasto };
+    this.gastoEditando = JSON.parse(JSON.stringify(gasto)); // Deep clone to be safe
     this.abierto = true;
+    this.requestUpdate();
   }
 
   #cerrarModal() {

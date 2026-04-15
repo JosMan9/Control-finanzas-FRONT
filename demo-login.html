@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Login Form</title>
+    <style>
+        body { margin: 0; padding: 0; background: #eef0f5; }
+        .back-link {
+            position: fixed; top: 16px; left: 16px; z-index: 100;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 14px; background: white; border-radius: 8px;
+            color: #1e3a8a; text-decoration: none; font-size: 13px; font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-family: system-ui, sans-serif;
+            transition: box-shadow 0.2s;
+        }
+        .back-link:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-link">&#8592; Volver al indice</a>
+    <div id="demo"></div>
+    <script type="module" src="./demo/demo-login.js"></script>
+</body>
+</html>
